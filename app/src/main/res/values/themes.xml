@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="PreferenceTheme" parent="AppBaseTheme">
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentListMaterial</item>
+
+        <!-- Groups -->
+        <item name="preferenceCategoryStyle">@style/Preference.Material.Category</item>
+        <item name="preferenceInformationStyle">@style/Preference.Material.Information</item>
+        <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
+
+        <!-- Standard Preferences -->
+        <item name="preferenceStyle">@style/Preference.Material</item>
+        <item name="checkBoxPreferenceStyle">@style/Preference.Material.CheckBoxPreference</item>
+        <item name="dialogPreferenceStyle">@style/Preference.Material.DialogPreference</item>
+        <item name="editTextPreferenceStyle">
+            @style/Preference.Material.DialogPreference.EditTextPreference
+        </item>
+        <item name="switchPreferenceCompatStyle">@style/Preference.Material.SwitchPreferenceCompat
+        </item>
+
+        <!-- Custom Preferences -->
+        <item name="ringtonePreferenceStyle">
+            @style/Preference.Material.DialogPreference.RingtonePreference
+        </item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Material.SeekBarPreference</item>
+        <item name="seekBarDialogPreferenceStyle">
+            @style/Preference.Material.DialogPreference.SeekBarDialogPreference
+        </item>
+
+        <item name="listPreferenceStyle">
+            @style/Preference.Material.DialogPreference.ListPreference
+        </item>
+        <item name="multiSelectListPreferenceStyle">
+            @style/Preference.Material.DialogPreference.MultiSelectListPreference
+        </item>
+
+        <!-- This will possibly be introduced by appcompat-v7 in the future. -->
+        <item name="asp_textAppearanceListItemSecondary">@style/TextAppearance.AppCompat.Body1
+        </item>
+
+        <!--<item name="preferenceTint">?colorAccent</item>-->
+        <item name="spinnerDropDownItemStyle">@style/Widget.Material.DropDownItem.Spinner</item>
+        <item name="dropDownListViewStyle">@style/Widget.Material.ListView.DropDown</item>
+    </style>
+</resources>

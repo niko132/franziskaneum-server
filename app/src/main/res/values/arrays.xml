@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ab_week">
+        <item>@string/a_week</item>
+        <item>@string/b_week</item>
+    </string-array>
+    <string-array name="home_categories">
+        <item>@string/news</item>
+        <item>@string/vplan</item>
+        <item>@string/timetable</item>
+        <item>@string/teacher_list</item>
+    </string-array>
+    <string-array name="home_categorie_values">
+        <item>news</item>
+        <item>vplan</item>
+        <item>timetable</item>
+        <item>teacher</item>
+    </string-array>
+    <string-array name="vibration">
+        <item>Aus</item>
+        <item>Standard</item>
+        <item>Kurz</item>
+        <item>Lang</item>
+    </string-array>
+    <string-array name="vibration_values">
+        <item>0</item>
+        <item>500</item>
+        <item>250</item>
+        <item>1000</item>
+    </string-array>
+    <string-array name="lights">
+        <item>Keins</item>
+        <item>Weiß</item>
+        <item>Rot</item>
+        <item>Gelb</item>
+        <item>Grün</item>
+        <item>Cyan</item>
+        <item>Blau</item>
+        <item>Lila</item>
+    </string-array>
+    <string-array name="light_values">
+        <item>-16777216</item>
+        <item>-1</item>
+        <item>-65536</item>
+        <item>-256</item>
+        <item>-16711936</item>
+        <item>-16711681</item>
+        <item>-16776961</item>
+        <item>-65281</item>
+    </string-array>
+    <string-array name="school_class_step">
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+    <string-array name="school_class">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+</resources>

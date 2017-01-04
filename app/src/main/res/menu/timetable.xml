@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/timetable_show_times"
+        android:icon="@drawable/ic_time"
+        android:title="@string/show_times"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/timetable_delete_week"
+        android:title="@string/delete_week" />
+    <item
+        android:id="@+id/timetable_delete_all"
+        android:title="@string/delete_all" />
+    <item
+        android:id="@+id/timetable_transfer_week"
+        android:title="@string/transfer_week" />
+</menu>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/drawer_items_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/drawer_news"
+            android:checked="true"
+            android:icon="@drawable/ic_news"
+            android:title="@string/news" />
+        <item
+            android:id="@+id/drawer_vplan"
+            android:checked="false"
+            android:icon="@drawable/ic_vplan"
+            android:title="@string/vplan" />
+        <item
+            android:id="@+id/drawer_timetable"
+            android:checked="false"
+            android:icon="@drawable/ic_timetable"
+            android:title="@string/timetable" />
+        <item
+            android:id="@+id/drawer_teacher"
+            android:checked="false"
+            android:icon="@drawable/ic_teacher_list"
+            android:title="@string/teacher_list" />
+    </group>
+    <group
+        android:id="@+id/drawer_settings_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/drawer_feedback"
+            android:checkable="false"
+            android:checked="false"
+            android:icon="@drawable/ic_edit"
+            android:title="@string/give_feedback" />
+        <item
+            android:id="@+id/drawer_settings"
+            android:checkable="false"
+            android:checked="false"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings" />
+    </group>
+
+</menu>

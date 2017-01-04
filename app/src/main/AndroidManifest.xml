@@ -1,0 +1,149 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="de.franziskaneum"
+    android:installLocation="internalOnly">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name=".FranzApplication"
+        android:allowBackup="true"
+        android:fullBackupContent="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:theme="@style/TransparentStatusTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="www.franziskaneum.de" />
+                <data android:scheme="http" />
+                <data android:pathPattern="/wordpress/category/aktuelles/" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="www.franziskaneum.de" />
+                <data android:scheme="http" />
+                <data android:pathPattern="/wordpress/schule/planung/vertretungsplan/" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="www.franziskaneum.de" />
+                <data android:scheme="http" />
+                <data android:pathPattern="/wordpress/wer-wir-sind/lehrerliste/" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".news.NewsArticleActivity"
+            android:label="@string/news"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".news.NewsArticleImageGalleryActivity"
+            android:launchMode="singleTop"
+            android:parentActivityName=".news.NewsArticleActivity" />
+        <activity
+            android:name=".vplan.VPlanDayActivity"
+            android:label="@string/vplan"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".timetable.TimetableEditSubjectActivity"
+            android:label="@string/subject"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".teacher.TeacherDetailActivity"
+            android:label="@string/teacher"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:label="@string/settings"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.NOTIFICATION_PREFERENCES" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".settings.AboutActivity"
+            android:label="@string/about"
+            android:launchMode="singleTop"
+            android:parentActivityName=".settings.SettingsActivity" />
+        <activity
+            android:name=".settings.AppUpdateActivity"
+            android:label="@string/app_update"
+            android:launchMode="singleTop"
+            android:parentActivityName=".settings.SettingsActivity"
+            android:screenOrientation="portrait" />
+
+        <service android:name=".settings.AppUpdateService" />
+        <service
+            android:name=".vplan.VPlanAppWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <receiver android:name=".BroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".vplan.VPlanAppWidgetProvider"
+            android:enabled="@bool/appwidget_vplan_enabled">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/vplan_appwidget_info" />
+        </receiver>
+        <service
+            android:name=".FranzFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name=".FranzFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification_app_update" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/ColorAccent" />
+    </application>
+
+</manifest>

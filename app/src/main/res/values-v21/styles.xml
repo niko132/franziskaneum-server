@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="AppBaseTheme">
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowSharedElementEnterTransition">@transition/change_bounds_with_arc_motion</item>
+        <item name="android:windowSharedElementExitTransition">@transition/change_bounds_with_arc_motion</item>
+    </style>
+
+    <style name="TransparentStatusTheme" parent="AppTheme">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+</resources>

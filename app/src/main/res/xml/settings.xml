@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <net.xpece.android.support.preference.PreferenceCategory android:title="@string/general">
+        <net.xpece.android.support.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="teacher_mode_enabled"
+            android:summaryOff="@string/teacher_mode_disabled"
+            android:summaryOn="@string/teacher_mode_enabled"
+            android:title="@string/teacher_mode" />
+
+        <de.franziskaneum.settings.SchoolClassOrTeacherShortcutPreference android:key="school_class_or_teacher_shortcut" />
+
+        <de.franziskaneum.settings.SummaryListPreference
+            android:defaultValue="news"
+            android:entries="@array/home_categories"
+            android:entryValues="@array/home_categorie_values"
+            android:key="home_category"
+            android:title="@string/home_category" />
+
+        <net.xpece.android.support.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="timetable_a_b_week"
+            android:summaryOff="@string/a_b_week_disabled"
+            android:summaryOn="@string/a_b_week_enabled"
+            android:title="@string/a_b_week" />
+    </net.xpece.android.support.preference.PreferenceCategory>
+    <net.xpece.android.support.preference.PreferenceCategory android:title="@string/notifications">
+        <net.xpece.android.support.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="vplan_notification_enabled"
+            android:summaryOff="@string/you_dont_receive_notifications_in_case_of_changes_to_the_vplan"
+            android:summaryOn="@string/you_receive_notifications_in_case_of_changes_to_the_vplan"
+            android:title="@string/vplan_notifications" />
+        <de.franziskaneum.settings.SummaryListPreference
+            android:defaultValue="500"
+            android:entries="@array/vibration"
+            android:entryValues="@array/vibration_values"
+            android:key="notification_vibration"
+            android:title="@string/vibration" />
+        <de.franziskaneum.settings.SummaryListPreference
+            android:defaultValue="-65281"
+            android:entries="@array/lights"
+            android:entryValues="@array/light_values"
+            android:key="notification_light"
+            android:title="@string/light" />
+    </net.xpece.android.support.preference.PreferenceCategory>
+    <net.xpece.android.support.preference.PreferenceCategory android:title="@string/help">
+        <net.xpece.android.support.preference.Preference android:title="@string/about">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="de.franziskaneum.settings.AboutActivity"
+                android:targetPackage="de.franziskaneum" />
+        </net.xpece.android.support.preference.Preference>
+        <net.xpece.android.support.preference.Preference
+            android:summary="@string/check_for_updates"
+            android:title="@string/app_update">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="de.franziskaneum.settings.AppUpdateActivity"
+                android:targetPackage="de.franziskaneum" />
+        </net.xpece.android.support.preference.Preference>
+        <net.xpece.android.support.preference.Preference android:title="@string/contact_developer">
+            <intent
+                android:action="android.intent.action.SENDTO"
+                android:data="mailto:app@franziskaneum.de">
+                <extra
+                    android:name="android.intent.extra.SUBJECT"
+                    android:value="@string/feedback_franziskaneum_app" />
+            </intent>
+        </net.xpece.android.support.preference.Preference>
+    </net.xpece.android.support.preference.PreferenceCategory>
+
+</PreferenceScreen>
