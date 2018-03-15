@@ -13,8 +13,10 @@
 			
 			// update existing row
 		} else {
-			$result = pg_query($db_connection, "INSERT INTO users ('token') VALUES ('" . $token . "')");
+			$result = pg_query($db_connection, "INSERT INTO users (token) VALUES ('" . $token . "')");
 			echo 'Hello World';
+			echo ' ';
+			echo pg_last_error($db_connection);
 			// create new row
 		}
 	}
