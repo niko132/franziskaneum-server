@@ -20,7 +20,7 @@
 			$num_rows = pg_num_rows($result);
 			
 			if ($num_rows >= 1) {
-				$query = "UPDATE users SET token = '" . $token "'";
+				$query = "UPDATE users SET token = '" . $token . "'";
 				
 				if (!empty($is_teacher)) {
 					$query .= ", is_teacher = ";
