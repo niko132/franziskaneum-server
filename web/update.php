@@ -22,7 +22,10 @@
 				// update 
 			} else {
 				$fields = 'token';
-				$values = '' . $token;
+				$values = $token;
+				
+				echo $values;
+				echo '      ';
 				
 				if (!empty($is_teacher)) {
 					$fields .= ', is_teacher';
