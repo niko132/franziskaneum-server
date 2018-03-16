@@ -20,6 +20,37 @@
 			$num_rows = pg_num_rows($result);
 			
 			if ($num_rows >= 1) {
+				$query = "UPDATE users SET token = '" . $token "'";
+				
+				if (!empty($is_teacher)) {
+					$query .= ", is_teacher = ";
+					$query .= $is_teacher;
+				}
+				
+				if (!empty($school_class)) {
+					$query .= ", school_class = ";
+					$query .= $school_class;
+				}
+				
+				if (!empty($school_class_index)) {
+					$query .= ", school_class_index = ";
+					$query .= $school_class_index;
+				}
+				
+				if (!empty($teacher_shortcut)) {
+					$query .= ", teacher_shortcut = ";
+					$query .= "'" . $teacher_shortcut . "'";
+				}
+				
+				if (!empty($courses)) {
+					$query .= ", courses = ";
+					$query .= "'" . $courses . "'";
+				}
+				
+				$query .= " WHERE token = '" . $token . "'";
+				
+				echo $query;
+				
 				// update 
 			} else {
 				$fields = "token";
