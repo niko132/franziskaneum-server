@@ -13,18 +13,51 @@
 		$teacher_shortcut = $POST['teacher_shortcut'];
 		$courses = $POST['courses'];
 		
-		if (!empty($old_token)) {
-			echo ' OLD TOKEN ';
-			
-			$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'");
-			echo 'rows: ';
-			echo  pg_num_rows($result);
-			
-			// wenn old_token in datenbank -> updaten
-			// sonst neue Zeile einfügen
-			
-			// update existing row
+		$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'");
+		$num_rows = pg_num_rows($result);
+		
+		if (!empty($old_token) && num_rows >= 1) {
+			// update existing row with new token
 		} else {
+			$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $token . "'");
+			$num_rows = pg_num_rows($result);
+			
+			if ($num_rows >= 1) {
+				// update 
+			} else {
+				$fields = 'token';
+				$values = $token;
+				
+				if (!empty($is_teacher)) {
+					$fields .= ', is_teacher';
+					$values .= ', ' . $is_teacher;
+				}
+				
+				if (!empty($school_class)) {
+					$fields .= ', school_class';
+					$values .= ', ' . school_class;
+				}
+				
+				if (!empty($school_class_index)) {
+					$fields .= ', school_class_index';
+					$values .= ', ' . school_class_index;
+				}
+				
+				if (!empty($teacher_shortcut)) {
+					$fields .= ', teacher_shortcut';
+					$values .= ', ' . teacher_shortcut;
+				}
+				
+				if (!empty($courses)) {
+					$fields .= ', courses';
+					$values .= ', ' . courses;
+				}
+				
+				echo $fields;
+				echo '     ';
+				echo $values;
+			}
+			
 			$result = pg_query($db_connection, "INSERT INTO users (token) VALUES ('" . $token . "')");
 			echo ' NEW ONE ';
 			echo pg_last_error($db_connection);
