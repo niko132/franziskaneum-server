@@ -13,7 +13,7 @@
 		$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'");
 		$num_rows = pg_num_rows($result);
 		
-		if (!empty($old_token) && num_rows >= 1) {
+		if (!empty($old_token) && $num_rows >= 1) {
 			echo 'new token ';
 			
 			$query = "UPDATE users SET token = '" . $token . "'";
