@@ -52,7 +52,7 @@
 			$num_rows = pg_num_rows($result);
 			
 			if ($num_rows >= 1) {
-				echo 'update values'
+				echo 'update values';
 				
 				$query = "UPDATE users SET token = '" . $token . "'";
 				
