@@ -31,22 +31,22 @@
 				
 				if (!empty($school_class)) {
 					$fields .= ', school_class';
-					$values .= ', ' . school_class;
+					$values .= ', ' . $school_class;
 				}
 				
 				if (!empty($school_class_index)) {
 					$fields .= ', school_class_index';
-					$values .= ', ' . school_class_index;
+					$values .= ', ' . $school_class_index;
 				}
 				
 				if (!empty($teacher_shortcut)) {
 					$fields .= ', teacher_shortcut';
-					$values .= ', ' . teacher_shortcut;
+					$values .= ', ' . $teacher_shortcut;
 				}
 				
 				if (!empty($courses)) {
 					$fields .= ', courses';
-					$values .= ', ' . courses;
+					$values .= ', ' . $courses;
 				}
 				
 				echo $fields;
