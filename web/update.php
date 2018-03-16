@@ -30,22 +30,10 @@
 					$values .= ', ' . $is_teacher;
 				}
 				
-				echo ' Test1 ';
-				echo '"' . $school_class . '"';
-				
 				if (!empty($school_class)) {
-					echo ' Test2 ';
-					
 					$fields .= ', school_class';
-					
-					echo ' Test3 ';
-					
 					$values .= ', ' . $school_class;
-					
-					echo ' Test4 ';
 				}
-				
-				echo ' Test5 ';
 				
 				if (!empty($school_class_index)) {
 					$fields .= ', school_class_index';
