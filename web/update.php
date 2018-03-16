@@ -16,6 +16,9 @@
 		if (!empty($old_token) && $num_rows >= 1) {
 			echo 'new token ';
 			
+			$query = "DELETE FROM users WHERE token = '" . $token . "'";
+			$result = pg_query($db_connection, $query);
+			
 			$query = "UPDATE users SET token = '" . $token . "'";
 			
 			if (!empty($is_teacher)) {
