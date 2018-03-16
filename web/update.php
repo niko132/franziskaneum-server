@@ -16,6 +16,12 @@
 		if (!empty($old_token)) {
 			echo ' OLD TOKEN ';
 			
+			$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'";
+			echo 'rows: ' . pg_num_rows($result);
+			
+			// wenn old_token in datenbank -> updaten
+			// sonst neue Zeile einfügen
+			
 			// update existing row
 		} else {
 			$result = pg_query($db_connection, "INSERT INTO users (token) VALUES ('" . $token . "')");
