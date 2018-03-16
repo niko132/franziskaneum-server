@@ -17,7 +17,8 @@
 			echo ' OLD TOKEN ';
 			
 			$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'";
-			echo 'rows: ' . pg_num_rows($result);
+			echo 'rows: ';
+			echo  pg_num_rows($result);
 			
 			// wenn old_token in datenbank -> updaten
 			// sonst neue Zeile einfügen
