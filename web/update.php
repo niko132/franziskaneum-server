@@ -50,9 +50,8 @@
 					$values .= ", '" . $courses . "'";
 				}
 				
-				echo $fields;
-				echo '     ';
-				echo $values;
+				$query = "INSERT INTO users (" . $fields . ") VALUES (" . $values . ")";
+				$result = pg_query($db_connection, $query);
 			}
 		}
 	}
