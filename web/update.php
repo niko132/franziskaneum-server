@@ -14,6 +14,8 @@
 		$num_rows = pg_num_rows($result);
 		
 		if (!empty($old_token) && num_rows >= 1) {
+			echo 'new token ';
+			
 			$query = "UPDATE users SET token = '" . $token . "'";
 			
 			if (!empty($is_teacher)) {
@@ -50,6 +52,8 @@
 			$num_rows = pg_num_rows($result);
 			
 			if ($num_rows >= 1) {
+				echo 'update values'
+				
 				$query = "UPDATE users SET token = '" . $token . "'";
 				
 				if (!empty($is_teacher)) {
@@ -80,6 +84,8 @@
 				$query .= " WHERE token = '" . $token . "'";
 				$result = pg_query($db_connection, $query);
 			} else {
+				echo 'insert token';
+				
 				$fields = "token";
 				$values = "'" . $token . "'";
 				
