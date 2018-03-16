@@ -22,32 +22,32 @@
 			if ($num_rows >= 1) {
 				// update 
 			} else {
-				$fields = 'token';
-				$values = $token;
+				$fields = "token";
+				$values = "'" . $token . "'";
 				
 				if (!empty($is_teacher)) {
-					$fields .= ', is_teacher';
-					$values .= ', ' . $is_teacher;
+					$fields .= ", is_teacher";
+					$values .= ", " . $is_teacher;
 				}
 				
 				if (!empty($school_class)) {
-					$fields .= ', school_class';
-					$values .= ', ' . $school_class;
+					$fields .= ", school_class";
+					$values .= ", " . $school_class;
 				}
 				
 				if (!empty($school_class_index)) {
-					$fields .= ', school_class_index';
-					$values .= ', ' . $school_class_index;
+					$fields .= ", school_class_index";
+					$values .= ", " . $school_class_index;
 				}
 				
 				if (!empty($teacher_shortcut)) {
-					$fields .= ', teacher_shortcut';
-					$values .= ', ' . $teacher_shortcut;
+					$fields .= ", teacher_shortcut";
+					$values .= ", '" . $teacher_shortcut . "'";
 				}
 				
 				if (!empty($courses)) {
-					$fields .= ', courses';
-					$values .= ', ' . $courses;
+					$fields .= ", courses";
+					$values .= ", '" . $courses . "'";
 				}
 				
 				echo $fields;
