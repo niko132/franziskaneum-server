@@ -43,6 +43,8 @@
 			
 			$query .= " WHERE token = '" . $old_token . "'";
 			$result = pg_query($db_connection, $query);
+			
+			echo pg_last_error($db_connection);
 		} else {
 			$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $token . "'");
 			$num_rows = pg_num_rows($result);
