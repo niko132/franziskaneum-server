@@ -25,18 +25,26 @@
 				$fields = 'token';
 				$values = $token;
 				
-				echo $values;
-				echo '      ';
-				
 				if (!empty($is_teacher)) {
 					$fields .= ', is_teacher';
 					$values .= ', ' . $is_teacher;
 				}
 				
+				echo ' Test1 ';
+				
 				if (!empty($school_class)) {
+					echo ' Test2 ';
+					
 					$fields .= ', school_class';
+					
+					echo ' Test3 ';
+					
 					$values .= ', ' . $school_class;
+					
+					echo ' Test4 ';
 				}
+				
+				echo ' Test5 ';
 				
 				if (!empty($school_class_index)) {
 					$fields .= ', school_class_index';
