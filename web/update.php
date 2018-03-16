@@ -31,6 +31,7 @@
 				}
 				
 				echo ' Test1 ';
+				echo '"' . $school_class . '"';
 				
 				if (!empty($school_class)) {
 					echo ' Test2 ';
