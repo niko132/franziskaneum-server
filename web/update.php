@@ -16,7 +16,7 @@
 		if (!empty($old_token)) {
 			echo ' OLD TOKEN ';
 			
-			$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'";
+			$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'");
 			echo 'rows: ';
 			echo  pg_num_rows($result);
 			
