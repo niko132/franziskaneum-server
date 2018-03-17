@@ -23,12 +23,13 @@ request(
 			
 			const pgClient = new Client({
 				connectionString: process.env.DATABASE_URL,
-				ssl: true,
 			});
 			
 			pgClient.query("SELECT * FROM users", (err, res) => {
 				console.log(res.rows.length + ' users');
 			});
+			
+			console.log(haupt);
 		});
 	}
 );
