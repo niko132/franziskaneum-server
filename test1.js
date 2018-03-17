@@ -35,7 +35,7 @@ request(
 					for (var j = 0; j < haupt.aktion.length; j++) {
 						var aktion = haupt.aktion[j];
 						
-						if (aktion.klasse[0].indexOf(row.school_class + '/' + row.school_class_index)) {
+						if (aktion.klasse[0].indexOf(row.school_class + '/' + row.school_class_index) > -1) {
 							console.log(aktion.klasse[0] + ' ' + row.school_class + '/' + row.school_class_index);
 							
 							userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
