@@ -1,30 +1,34 @@
-var {google} = require('googleapis');
+var request = require('request');
+var xml2js = require('xml2js');
+const { Client } = require('pg');
 
-function getAccessToken() {
-	return new Promise(function(resolve, reject) {
-		var key = require('./service-account.json');
-		var jwtClient = new google.auth.JWT(
-			key.client_email,
-			null,
-			key.private_key,
-			SCOPES,
-			null
-		);
-		jwtClient.authorize(function(err, tokens) {
-			if (err) {
-				reject(err);
-				return;
-			}
-			resolve(tokens.access_token);
+var username = "FranzApp";
+var password = "Franz2017";
+var url = "http://franziskaneum.de/vplan/vplank.xml";
+var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+request(
+	{
+		url: url,
+		headers: {
+			"Authorization": auth
+		}
+	},
+	function(error, response, body) {
+		var parser = new xml2js.Parser();
+		parser.parseString(body, function(err, result) {			
+			var haupt = result.vp.haupt[0];
+			
+			// TODO: gucken ob Vertretungsplan neu ist
+			
+			const pgClient = new Client({
+				connectionString: process.env.DATABASE_URL,
+				ssl: true,
+			});
+			
+			pgClient.query("SELECT * FROM users", (err, res) => {
+				console.log(res.rows.length + ' users');
+			});
 		});
-	});
-}
-
-console.log('test');
-console.log('\n');
-
-getAccessToken().then(function(result) {
-	console.log(result);
-}, function(err) {
-	console.log(err);
-});
+	}
+);
