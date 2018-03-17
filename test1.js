@@ -27,7 +27,7 @@ request(
 			pgClient.connect();
 			
 			pgClient.query("SELECT * FROM users", (err, res) => {
-				console.log(res.rows);
+				console.log(res.rows[1].token);
 			});
 		});
 	}
