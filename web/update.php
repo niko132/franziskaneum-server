@@ -99,7 +99,7 @@
 			if ($num_rows >= 1) {
 				echo 'update values';
 				
-				$query = createUpdateQuery($toke, $token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses);
+				$query = createUpdateQuery($token, $token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses);
 				$result = pg_query($db_connection, $query);
 				
 				echo pg_last_error($db_connection);
