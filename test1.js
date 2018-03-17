@@ -24,12 +24,13 @@ request(
 			const pgClient = new Client({
 				connectionString: process.env.DATABASE_URL,
 			});
+			await pgClient.connect();
 			
 			pgClient.query("SELECT * FROM users", (err, res) => {
 				console.log(res.rows.length + ' users');
 			});
 			
-			console.log(haupt);
+			console.log('Hello World!');
 		});
 	}
 );
