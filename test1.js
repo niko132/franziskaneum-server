@@ -32,7 +32,7 @@ request(
 					
 					var userNot = '';
 					
-					for (int j = 0; j < haupt.aktion.length; j++) {
+					for (var j = 0; j < haupt.aktion.length; j++) {
 						var aktion = haupt.aktion[j];
 						
 						if (aktion.klasse[0].indexOf(row.school_class + '/' + row.school_class_index)) {
