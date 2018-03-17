@@ -106,7 +106,7 @@
 			} else {
 				echo 'insert token';
 				
-				$query = createInsertQuery($token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses)
+				$query = createInsertQuery($token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses);
 				$result = pg_query($db_connection, $query);
 				
 				echo pg_last_error($db_connection);
