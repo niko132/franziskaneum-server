@@ -27,10 +27,8 @@ request(
 			pgClient.connect();
 			
 			pgClient.query("SELECT * FROM users", (err, res) => {
-				console.log(res.rows.length + ' users');
+				console.log(res.rows);
 			});
-			
-			console.log('Hello World!');
 		});
 	}
 );
