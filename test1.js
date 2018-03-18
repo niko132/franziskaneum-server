@@ -75,7 +75,7 @@ request(
 					} else {
 						console.log('sek1 user');
 						
-						var schoolClass = user.school_class + ' ' + user.school_class_index;
+						var schoolClass = user.school_class + '/' + user.school_class_index;
 						
 						for (var j = 0; j < haupt.aktion.length; j++) {
 							var aktion = haupt.aktion[j];
