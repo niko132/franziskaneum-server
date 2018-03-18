@@ -87,7 +87,7 @@ request(
 						}
 					}
 					
-					console.log('USER TOKEN: ' + row.token);
+					console.log('USER TOKEN: ' + user.token);
 					console.log(userNot);
 					console.log('\n');
 				}
