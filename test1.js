@@ -45,6 +45,8 @@ request(
 					var userNot = '';
 					
 					if (user.is_teacher) {
+						console.log('teacher user');
+						
 						var shortcut = user.teacher_shortcut;
 						
 						for (var j = 0; j < haupt.aktion.length; j++) {
@@ -57,6 +59,8 @@ request(
 							}
 						}
 					} else if (user.school_class >= 11) {
+						console.log('sek2 user');
+						
 						var schoolClass = user.school_class;
 						var courses = users.courses;
 						
@@ -69,6 +73,8 @@ request(
 							}
 						}
 					} else {
+						console.log('sek1 user');
+						
 						var schoolClass = user.school_class + ' ' + user.school_class_index;
 						
 						for (var j = 0; j < haupt.aktion.length; j++) {
