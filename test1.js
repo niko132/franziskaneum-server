@@ -52,7 +52,7 @@ request(
 							var searchString = aktion.lehrer[0] + aktion.info[0];
 						
 							if (searchString.indexOf(shortcut) > -1) {
-								console.log(searchString + ' ' + teacher_shortcut);
+								console.log(searchString + ' ' + shortcut);
 							
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
