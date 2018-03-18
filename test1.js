@@ -49,11 +49,9 @@ request(
 						
 						for (var j = 0; j < haupt.aktion.length; j++) {
 							var aktion = haupt.aktion[j];
-							var searchString = aktion.lehrer[0] + aktion.info[0];
+							var searchString = aktion.lehrer[0] + ' ' + aktion.info[0];
 						
 							if (searchString.indexOf(shortcut) > -1) {
-								console.log(searchString + ' ' + shortcut);
-							
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
 							}
@@ -65,9 +63,7 @@ request(
 						for (var j = 0; j < haupt.aktion.length; j++) {
 							var aktion = haupt.aktion[j];
 						
-							if (aktion.klasse[0].indexOf(schoolClass) > -1 && hasCourse(aktion.klasse[0], courses)) {
-								console.log(aktion.klasse[0] + ' ' + schoolClass + ' ' + courses);
-							
+							if (aktion.klasse[0].indexOf(schoolClass) > -1 && hasCourse(aktion.klasse[0], courses)) {							
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
 							}
@@ -78,9 +74,7 @@ request(
 						for (var j = 0; j < haupt.aktion.length; j++) {
 							var aktion = haupt.aktion[j];
 						
-							if (aktion.klasse[0].indexOf(schoolClass) > -1) {
-								console.log(aktion.klasse[0] + ' ' + schoolClass);
-							
+							if (aktion.klasse[0].indexOf(schoolClass) > -1) {							
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
 							}
