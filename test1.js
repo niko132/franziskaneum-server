@@ -62,7 +62,7 @@ request(
 						console.log('sek2 user');
 						
 						var schoolClass = user.school_class;
-						var courses = users.courses;
+						var courses = user.courses;
 						
 						for (var j = 0; j < haupt.aktion.length; j++) {
 							var aktion = haupt.aktion[j];
