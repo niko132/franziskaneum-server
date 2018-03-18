@@ -87,6 +87,8 @@ request(
 						}
 					}
 					
+					// TODO: call FCM to send notification
+					
 					console.log('USER TOKEN: ' + user.token);
 					console.log(userNot);
 					console.log('\n');
