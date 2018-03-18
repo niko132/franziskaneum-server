@@ -43,6 +43,7 @@ request(
 					var user = res.rows[i];
 					
 					var userNot = '';
+					var userNotCount = 0;
 					
 					if (user.is_teacher) {
 						console.log('teacher user');
@@ -56,6 +57,8 @@ request(
 							if (searchString.indexOf(shortcut) > -1) {
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
+								
+								userNotCount += 1;
 							}
 						}
 					} else if (user.school_class >= 11) {
@@ -70,6 +73,8 @@ request(
 							if (aktion.klasse[0].indexOf(schoolClass) > -1 && hasCourse(aktion.klasse[0], courses)) {							
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
+								
+								userNotCount += 1;
 							}
 						}
 					} else {
@@ -83,8 +88,38 @@ request(
 							if (aktion.klasse[0].indexOf(schoolClass) > -1) {							
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
+								
+								userNotCount += 1;
 							}
 						}
+					}
+					
+					if (userNot) {
+						var body = {
+							to: user.token,
+							notification: {
+								body: userNotCount + ' Änderungen'
+							}
+						}
+						
+						console.log(JSON.stringify(body));
+						
+						/*
+						request(
+							{
+								url: 'https://fcm.googleapis.com/fcm/send',
+								method: 'POST',
+								body: '', // BODY implementieren
+								headers: {
+									"Content-Type": "application/json",
+									"Authorization": "key=AIzaSyDCVVrr4nA3Pd6LmOWO7i0m95ASCTusw68"
+								}
+							},
+							function(error, response, body) {
+								
+							}
+						);
+						*/
 					}
 					
 					// TODO: call FCM to send notification
