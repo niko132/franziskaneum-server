@@ -104,22 +104,21 @@ request(
 						
 						console.log(JSON.stringify(body));
 						
-						/*
 						request(
 							{
 								url: 'https://fcm.googleapis.com/fcm/send',
 								method: 'POST',
-								body: '', // BODY implementieren
+								body: JSON.stringify(body),
 								headers: {
 									"Content-Type": "application/json",
 									"Authorization": "key=AIzaSyDCVVrr4nA3Pd6LmOWO7i0m95ASCTusw68"
 								}
 							},
 							function(error, response, body) {
-								
+								console.log(response);
+								console.log(body);
 							}
 						);
-						*/
 					}
 					
 					// TODO: call FCM to send notification
