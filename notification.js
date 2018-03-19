@@ -115,7 +115,6 @@ request(
 								}
 							},
 							function(error, response, body) {
-								console.log(response);
 								console.log(body);
 							}
 						);
