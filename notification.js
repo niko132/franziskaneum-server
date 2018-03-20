@@ -130,7 +130,7 @@ request(
 					console.log("query: " + hashesString);
 					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}'", (err, res) => {
 						
-					}
+					});
 					
 					if (newNotificationIndices.length > 0) { // new notifications -> request fcm
 						var notificationCount = newNotificationIndices.length;
