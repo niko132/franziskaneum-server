@@ -103,16 +103,22 @@ request(
 						}
 					}
 					
-					if (userNotifications.length > 0) {
-						var userNotificationHashes = [];
+					var userNotificationHashes = [];
+					var newNotificationIndices = [];
+					
+					for (var j = 0; j < userNotifications.length; j++) {
+						var hash = CRC32.str(userNotifications[j]);
+						userNotificationHashes.push(hash);
 						
-						for (var j = 0; j < userNotifications.length; j++) {
-							userNotificationHashes.push(CRC32.str(userNotifications[j]));
-							
-							console.log("" + userNotificationHashes[j]);
+						if (user.sended_notification_hashes.indexOf(hash) > -1) {
+							newNotificationIndices.push(j);
 						}
 					}
 					
+					console.log("NEW NOTIFICATIONS: " + newNotificationIndices.length);
+					
+					// TODO: insert 'userNotificationHashes' in database
+				
 					if (userNot) {
 						var body = {
 							to: user.token,
