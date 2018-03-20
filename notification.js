@@ -110,7 +110,7 @@ request(
 						var hash = CRC32.str(userNotifications[j]);
 						userNotificationHashes.push(hash);
 						
-						console.log(Type(user.sended_notification_hashes));
+						console.log("Is Array: " + Array.isArray(user.sended_notification_hashes));
 						
 						if (user.sended_notification_hashes.indexOf(hash) > -1) {
 							newNotificationIndices.push(j);
