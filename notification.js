@@ -138,7 +138,7 @@ request(
 						var body = {
 							to: user.token,
 							notification: {
-								body: notificationCount + ' Änderungen'
+								body: notificationCount + ' Änderungen '
 							}
 						}
 						
