@@ -105,10 +105,17 @@ request(
 					
 					var userNotificationHashes = [];
 					var newNotificationIndices = [];
+					var hashesString = "";
 					
 					for (var j = 0; j < userNotifications.length; j++) {
 						var hash = CRC32.str(userNotifications[j]);
 						userNotificationHashes.push(hash);
+						
+						if (j == userNotifications.length - 1) {
+							hashesString += hash;
+						} else {
+							hashesString += hash + ", ";
+						}
 						
 						console.log(hash);
 						
@@ -120,7 +127,42 @@ request(
 					console.log("NEW NOTIFICATIONS: " + newNotificationIndices.length);
 					
 					// TODO: insert 'userNotificationHashes' in database
+					console.log("query: " + hashesString);
+					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}'", (err, res) => {
+						
+					}
+					
+					if (newNotificationIndices.length > 0) { // new notifications -> request fcm
+						var notificationCount = newNotificationIndices.length;
+					
+						var body = {
+							to: user.token,
+							notification: {
+								body: notificationCount + ' Änderungen'
+							}
+						}
+						
+						console.log(JSON.stringify(body));
+						
+						request(
+							{
+								url: 'https://fcm.googleapis.com/fcm/send',
+								method: 'POST',
+								body: JSON.stringify(body),
+								headers: {
+									"Content-Type": "application/json",
+									"Authorization": "key=AIzaSyDCVVrr4nA3Pd6LmOWO7i0m95ASCTusw68"
+								}
+							},
+							function(error, response, body) {
+								console.log(body);
+								
+								// TODO: Handle "InvalidRegistration" -> Delete Row
+							}
+						);
+					}
 				
+				/*
 					if (userNot) {
 						var body = {
 							to: user.token,
@@ -148,6 +190,7 @@ request(
 							}
 						);
 					}
+					*/
 				}
 			});
 		});
