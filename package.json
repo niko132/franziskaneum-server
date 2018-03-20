@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "test1.js",
   "dependencies": {
+    "crc-32": "^1.2.0",
     "pg": "^7.4.1",
     "request": "^2.85.0",
     "xml2js": "^0.4.19"

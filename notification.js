@@ -1,3 +1,4 @@
+var CRC32 = require('crc-32');
 var request = require('request');
 var xml2js = require('xml2js');
 const { Client } = require('pg');
@@ -42,6 +43,8 @@ request(
 				for (var i = 0; i < res.rows.length; i++) {
 					var user = res.rows[i];
 					
+					var userNotifications = [];
+					
 					var userNot = '';
 					var userNotCount = 0;
 					
@@ -55,6 +58,8 @@ request(
 							var searchString = aktion.lehrer[0] + ' ' + aktion.info[0];
 						
 							if (searchString.indexOf(shortcut) > -1) {
+								userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
+								
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
 								
@@ -71,6 +76,8 @@ request(
 							var aktion = haupt.aktion[j];
 						
 							if (aktion.klasse[0].indexOf(schoolClass) > -1 && hasCourse(aktion.klasse[0], courses)) {							
+								userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
+								
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
 								
@@ -86,11 +93,23 @@ request(
 							var aktion = haupt.aktion[j];
 						
 							if (aktion.klasse[0].indexOf(schoolClass) > -1) {							
+								userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
+								
 								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
 								userNot += '\n';
 								
 								userNotCount += 1;
 							}
+						}
+					}
+					
+					if (userNotifications.length > 0) {
+						var userNotificationHashes = [];
+						
+						for (var j = 0; j < userNotifications.length; j++) {
+							userNotificationHashes.push(CRC32.str(userNotifications[j]));
+							
+							console.log("" + userNotificationHashes[j]);
 						}
 					}
 					
@@ -116,15 +135,11 @@ request(
 							},
 							function(error, response, body) {
 								console.log(body);
+								
+								// TODO: Handle "InvalidRegistration" -> Delete Row
 							}
 						);
 					}
-					
-					// TODO: call FCM to send notification
-					
-					console.log('USER TOKEN: ' + user.token);
-					console.log(userNot);
-					console.log('\n');
 				}
 			});
 		});
