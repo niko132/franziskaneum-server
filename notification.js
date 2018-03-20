@@ -112,7 +112,7 @@ request(
 						
 						console.log(user.notification_hashes);
 						
-						if (user.notification_hashes.indexOf(hash) > -1) {
+						if (user.notification_hashes.indexOf(hash) <= -1) { // this hash wasn't already presented
 							newNotificationIndices.push(j);
 						}
 					}
