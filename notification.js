@@ -110,9 +110,9 @@ request(
 						var hash = CRC32.str(userNotifications[j]);
 						userNotificationHashes.push(hash);
 						
-						console.log(user.sended_notification_hashes);
+						console.log(user.notification_hashes);
 						
-						if (user.sended_notification_hashes.indexOf(hash) > -1) {
+						if (user.notification_hashes.indexOf(hash) > -1) {
 							newNotificationIndices.push(j);
 						}
 					}
