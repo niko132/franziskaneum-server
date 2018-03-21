@@ -126,7 +126,7 @@ request(
 					
 					console.log("NEW NOTIFICATIONS: " + newNotificationIndices.length);
 					
-					// TODO: insert 'userNotificationHashes' in database
+					// insert 'userNotificationHashes' in database
 					console.log("query: " + hashesString);
 					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}'", (err, res) => {
 						
