@@ -16,7 +16,7 @@ function hasCourse(searchString, courses) {
 }
 
 var username = "FranzApp";
-var password = "Franz2017";
+var password = "Franz2018";
 var url = "http://franziskaneum.de/vplan/vplank.xml";
 var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
@@ -128,7 +128,7 @@ request(
 					
 					// insert 'userNotificationHashes' in database
 					console.log("query: " + hashesString);
-					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}'", (err, res) => {
+					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}' WHERE token = '" + user.token + "'", (err, res) => {
 						
 					});
 					
