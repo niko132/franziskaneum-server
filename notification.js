@@ -1,7 +1,7 @@
 var CRC32 = require('crc-32');
 var request = require('request');
 var xml2js = require('xml2js');
-var http = request('http');
+var http = require('http');
 const {Client} = require('pg');
 
 function hasCourse(searchString, courses) {
