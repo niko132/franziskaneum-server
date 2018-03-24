@@ -1,6 +1,7 @@
 var CRC32 = require('crc-32');
 var request = require('request');
 var xml2js = require('xml2js');
+var http = request('http');
 const {Client} = require('pg');
 
 function hasCourse(searchString, courses) {
@@ -15,7 +16,9 @@ function hasCourse(searchString, courses) {
 	return false;
 }
 
-var main = function () {	
+var main = function () {
+	http.get("https://franziskaneum.herokuapp.com/");
+	
 	var username = "FranzApp";
 	var password = "Franz2018";
 	var url = "http://franziskaneum.de/vplan/vplank.xml";
