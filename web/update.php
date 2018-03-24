@@ -22,7 +22,7 @@
 			$query .= "'" . $teacher_shortcut . "'";
 		}
 		
-		if (!($courses === NULL)) {
+		if (!is_null($courses)) {
 			$query .= ", courses = ";
 			$query .= "'{" . $courses . "}'";
 		}
@@ -56,7 +56,7 @@
 			$values .= ", '" . $teacher_shortcut . "'";
 		}
 		
-		if (!($courses === NULL)) {
+		if (!is_null($courses)) {
 			$fields .= ", courses";
 			$values .= ", '{" . $courses . "}'";
 		}
@@ -78,7 +78,7 @@
 		$school_class_index = $_POST['school_class_index'];
 		$teacher_shortcut = $_POST['teacher_shortcut'];
 		
-		if (isset($_POST['courses']) {
+		if (isset($_POST['courses'])) {
 			$courses = $_POST['courses'];
 		} else {
 			$courses = NULL;
