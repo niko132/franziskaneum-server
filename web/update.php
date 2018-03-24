@@ -56,7 +56,7 @@
 			$values .= ", '" . $teacher_shortcut . "'";
 		}
 		
-		if (!empty($courses)) {
+		if (!($courses === NULL)) {
 			$fields .= ", courses";
 			$values .= ", '{" . $courses . "}'";
 		}
@@ -77,12 +77,17 @@
 		$school_class = $_POST['school_class'];
 		$school_class_index = $_POST['school_class_index'];
 		$teacher_shortcut = $_POST['teacher_shortcut'];
-		$courses = $_POST['courses'];
+		
+		if (isset($_POST['courses']) {
+			$courses = $_POST['courses'];
+		} else {
+			$courses = NULL;
+		}
 		
 		$result = pg_query($db_connection, "SELECT token FROM users WHERE token = '" . $old_token . "'");
 		$num_rows = pg_num_rows($result);
 		
-		if (!empty($old_token) && $num_rows >= 1) {
+		if (!empty($old_token) && $num_rows >= 1 && !($token === $old_token)) {
 			echo 'new token ';
 			
 			$query = "DELETE FROM users WHERE token = '" . $token . "'";
