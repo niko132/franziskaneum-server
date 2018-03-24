@@ -1,11 +1,15 @@
 var CronJob = require('cron').CronJob;
 var worker = require('./worker.js');
 
+var fifteenSeconsAfterMinute = function() {
+	console.log("Another minute is gone forever. Hopefully, you made the most of it...");
+}
+
 var job = new CronJob({
-	cronTime: "0 */1 * * * *", // every 5 minutes
-	onTick: worker.start(),
+	cronTime: "0 */1 * * * *",//15 seconds after every minute
+	onTick: worker.start,
 	start: true,
-	timeZone: "Europe/Berlin"
+	timeZone: "America/Los_Angeles"
 });
 
 job.start();
