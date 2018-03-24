@@ -53,52 +53,63 @@ request(
 						
 						var shortcut = user.teacher_shortcut;
 						
-						for (var j = 0; j < haupt.aktion.length; j++) {
-							var aktion = haupt.aktion[j];
-							var searchString = aktion.lehrer[0] + ' ' + aktion.info[0];
+						if (shortcut) {
+							for (var j = 0; j < haupt.aktion.length; j++) {
+								var aktion = haupt.aktion[j];
+								var searchString = aktion.lehrer[0] + ' ' + aktion.info[0];
 						
-							if (searchString.indexOf(shortcut) > -1) {
-								userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
+								if (searchString.indexOf(shortcut) > -1) {
+									userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
 								
-								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
-								userNot += '\n';
+									userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
+									userNot += '\n';
 								
-								userNotCount += 1;
-							}
-						}
-					} else if (user.school_class >= 11) {
-						console.log('sek2 user');
-						
-						var schoolClass = user.school_class;
-						var courses = user.courses;
-						
-						for (var j = 0; j < haupt.aktion.length; j++) {
-							var aktion = haupt.aktion[j];
-						
-							if (aktion.klasse[0].indexOf(schoolClass) > -1 && hasCourse(aktion.klasse[0], courses)) {							
-								userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
-								
-								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
-								userNot += '\n';
-								
-								userNotCount += 1;
+									userNotCount += 1;
+								}
 							}
 						}
 					} else {
-						console.log('sek1 user');
+						var schoolClass = user.school_class;
 						
-						var schoolClass = user.school_class + '/' + user.school_class_index;
+						if (schoolClass >= 11) {
+							console.log('sek2 user');
 						
-						for (var j = 0; j < haupt.aktion.length; j++) {
-							var aktion = haupt.aktion[j];
+							var courses = user.courses;
+							
+							if (courses.length > 0) {						
+								for (var j = 0; j < haupt.aktion.length; j++) {
+									var aktion = haupt.aktion[j];
 						
-							if (aktion.klasse[0].indexOf(schoolClass) > -1) {							
-								userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
+									if (aktion.klasse[0].indexOf(schoolClass) > -1 && hasCourse(aktion.klasse[0], courses)) {							
+										userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
 								
-								userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
-								userNot += '\n';
+										userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
+										userNot += '\n';
 								
-								userNotCount += 1;
+										userNotCount += 1;
+									}
+								}
+							}
+						} else if (schoolClass >= 5) { // default value von 0 vermeiden
+							console.log('sek1 user');
+							
+							var schoolClassIndex = user.school_class_index;
+							
+							if (schoolClassIndex > 0) {
+								var schoolClassString = schoolClass + '/' + schoolClassIndex;
+						
+								for (var j = 0; j < haupt.aktion.length; j++) {
+									var aktion = haupt.aktion[j];
+						
+									if (aktion.klasse[0].indexOf(schoolClassString) > -1) {							
+										userNotifications.push(aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.klasse[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0]);
+								
+										userNot += aktion.stunde[0] + '. St. ' + aktion.fach[0] + ' ' + aktion.lehrer[0] + ' ' + aktion.raum[0] + ' ' + aktion.info[0];
+										userNot += '\n';
+								
+										userNotCount += 1;
+									}
+								}
 							}
 						}
 					}

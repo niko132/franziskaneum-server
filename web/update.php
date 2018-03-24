@@ -24,7 +24,7 @@
 		
 		if (!empty($courses)) {
 			$query .= ", courses = ";
-			$query .= "'" . $courses . "'";
+			$query .= "'{" . $courses . "}'";
 		}
 		
 		$query .= " WHERE token = '" . $old_token . "'";
@@ -58,7 +58,7 @@
 		
 		if (!empty($courses)) {
 			$fields .= ", courses";
-			$values .= ", '" . $courses . "'";
+			$values .= ", '{" . $courses . "}'";
 		}
 		
 		$query = "INSERT INTO users (" . $fields . ") VALUES (" . $values . ")";
