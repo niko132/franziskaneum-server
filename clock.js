@@ -7,5 +7,3 @@ var job = new CronJob({
 	start: true,
 	timeZone: "Europe/Berlin"
 });
-
-job.start();
