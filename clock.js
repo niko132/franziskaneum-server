@@ -10,11 +10,12 @@ new CronJob({
 });
 
 new CronJob({
-	cronTime: "0 */25 * * * *", // every 25 minutes
+	cronTime: "0 */5 * * * *", // every 25 minutes
 	onTick: function() {
 		console.log("Keeping the dyno alive...");
 		http.get("http://franziskaneum.herokuapp.com/"); // use this to prevent the dyno from sleeping ;)
 	},
 	start: true,
-	timeZone: "Europe/Berlin"
+	timeZone: "Europe/Berlin",
+	runOnInit: true
 });
