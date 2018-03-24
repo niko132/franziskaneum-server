@@ -17,7 +17,7 @@ function hasCourse(searchString, courses) {
 }
 
 var main = function () {
-	http.get("https://franziskaneum.herokuapp.com/");
+	http.get("https://franziskaneum.herokuapp.com/"); // use this to prevent the dyno from sleeping ;)
 	
 	var username = "FranzApp";
 	var password = "Franz2018";
