@@ -22,7 +22,7 @@
 			$query .= "'" . $teacher_shortcut . "'";
 		}
 		
-		if (!empty($courses)) {
+		if (!($courses === NULL)) {
 			$query .= ", courses = ";
 			$query .= "'{" . $courses . "}'";
 		}
