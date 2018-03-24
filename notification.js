@@ -1,7 +1,6 @@
 var CRC32 = require('crc-32');
 var request = require('request');
 var xml2js = require('xml2js');
-var http = require('http');
 const {Client} = require('pg');
 
 function hasCourse(searchString, courses) {
@@ -17,8 +16,6 @@ function hasCourse(searchString, courses) {
 }
 
 var main = function () {
-	http.get("http://franziskaneum.herokuapp.com/"); // use this to prevent the dyno from sleeping ;)
-	
 	var username = "FranzApp";
 	var password = "Franz2018";
 	var url = "http://franziskaneum.de/vplan/vplank.xml";
