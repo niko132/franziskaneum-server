@@ -43,6 +43,10 @@ request(
 				for (var i = 0; i < res.rows.length; i++) {
 					var user = res.rows[i];
 					
+					if (!user.show_notifications) {
+						continue;
+					}
+					
 					var userNotifications = [];
 					
 					var userNot = '';
