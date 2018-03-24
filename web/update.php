@@ -1,5 +1,5 @@
 <?php
-	function createUpdateQuery($token, $old_token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses) {
+	function createUpdateQuery($token, $old_token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses, $show_notifications) {
 		$query = "UPDATE users SET token = '" . $token . "'";
 		
 		if (!empty($is_teacher)) {
@@ -27,12 +27,17 @@
 			$query .= "'{" . $courses . "}'";
 		}
 		
+		if (!empty($show_notifications)) {
+			$query .= ", show_notifications = ";
+			$query .= $show_notifications;
+		}
+		
 		$query .= " WHERE token = '" . $old_token . "'";
 			
 		return $query;
 	}
 	
-	function createInsertQuery($token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses) {
+	function createInsertQuery($token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses, $show_notifications) {
 		$fields = "token";
 		$values = "'" . $token . "'";
 		
@@ -61,6 +66,11 @@
 			$values .= ", '{" . $courses . "}'";
 		}
 		
+		if (!empty($show_notifications)) {
+			$query .= ", show_notifications = ";
+			$query .= $show_notifications;
+		}
+		
 		$query = "INSERT INTO users (" . $fields . ") VALUES (" . $values . ")";
 				
 		return $query;
@@ -77,6 +87,7 @@
 		$school_class = $_POST['school_class'];
 		$school_class_index = $_POST['school_class_index'];
 		$teacher_shortcut = $_POST['teacher_shortcut'];
+		$show_notifications = $_POST['show_notifications'];
 		
 		if (isset($_POST['courses'])) {
 			$courses = $_POST['courses'];
@@ -93,7 +104,7 @@
 			$query = "DELETE FROM users WHERE token = '" . $token . "'";
 			$result = pg_query($db_connection, $query);
 			
-			$query = createUpdateQuery($token, $old_token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses);
+			$query = createUpdateQuery($token, $old_token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses, $show_notifications);
 			$result = pg_query($db_connection, $query);
 			
 			echo pg_last_error($db_connection);
@@ -104,14 +115,14 @@
 			if ($num_rows >= 1) {
 				echo 'update values';
 				
-				$query = createUpdateQuery($token, $token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses);
+				$query = createUpdateQuery($token, $token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses, $show_notifications);
 				$result = pg_query($db_connection, $query);
 				
 				echo pg_last_error($db_connection);
 			} else {
 				echo 'insert token';
 				
-				$query = createInsertQuery($token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses);
+				$query = createInsertQuery($token, $is_teacher, $school_class, $school_class_index, $teacher_shortcut, $courses, $show_notifications);
 				$result = pg_query($db_connection, $query);
 				
 				echo pg_last_error($db_connection);
