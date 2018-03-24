@@ -6,7 +6,7 @@ var fifteenSeconsAfterMinute = function() {
 }
 
 var job = new CronJob({
-  cronTime: "00 */1 * * *",//15 seconds after every minute
+  cronTime: "0 */1 * * * *",//15 seconds after every minute
   onTick: fifteenSeconsAfterMinute,
   start: true,
   timeZone: "America/Los_Angeles"
