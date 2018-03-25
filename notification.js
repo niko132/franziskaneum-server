@@ -173,6 +173,8 @@ var main = function () {
 						});
 					}
 				}
+				
+				pgClient.end();
 			});
 		});
 	});
