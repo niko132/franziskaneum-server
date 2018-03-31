@@ -34,8 +34,10 @@ var main = function () {
 
 			// TODO: gucken ob Vertretungsplan neu ist
 
-			const pgClient = new Client();
-			await pgClient.connect();
+			const pgClient = new Client({
+				connectionString: process.env.DATABASE_URL,
+			});
+			pgClient.connect();
 
 			var res = await pgClient.query("SELECT * FROM users");
 			for (var i = 0; i < res.rows.length; i++) {
