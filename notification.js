@@ -40,6 +40,7 @@ var main = function () {
 			pgClient.connect();
 			
 			var openQueries = 0;
+			var canClose = false;
 
 			pgClient.query("SELECT * FROM users", (err, res) => {
 				for (var i = 0; i < res.rows.length; i++) {
@@ -146,6 +147,10 @@ var main = function () {
 						openQueries = openQueries - 1;
 						
 						console.log("OpenQueries: " + openQueries);
+						
+						if (openQueries == 0 && canClose) {
+							pgClient.end();
+						}
 					});
 					
 					console.log("Token: " + user.token);
@@ -179,7 +184,8 @@ var main = function () {
 					}
 				}
 				
-				pgClient.end();
+				// pgClient.end();
+				canClose = true;
 			});
 		});
 	});
