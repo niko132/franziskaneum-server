@@ -39,7 +39,7 @@ var main = function () {
 			});
 			pgClient.connect();
 
-			var res = await pgClient.query("SELECT * FROM users");
+			var res = await pgClient.query("SELECT * FROM users", []);
 			for (var i = 0; i < res.rows.length; i++) {
 				var user = res.rows[i];
 
