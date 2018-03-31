@@ -16,6 +16,8 @@ function hasCourse(searchString, courses) {
 }
 
 var main = function () {
+	var start = Date.now();
+	
 	var username = "FranzApp";
 	var password = "Franz2018";
 	var url = "http://franziskaneum.de/vplan/vplank.xml";
@@ -177,6 +179,7 @@ var main = function () {
 				
 				Promise.all(queryPromises).then(function() {
 					pgClient.end();
+					console.log("Elapsed Time: " + (Date.now() - start) + "ms");
 				});
 			});
 		});
