@@ -120,17 +120,10 @@ var main = function () {
 
 					var userNotificationHashes = [];
 					var newNotificationIndices = [];
-					var hashesString = "";
 
 					for (var j = 0; j < userNotifications.length; j++) {
 						var hash = CRC32.str(userNotifications[j]);
 						userNotificationHashes.push(hash);
-
-						if (j == userNotifications.length - 1) {
-							hashesString += hash;
-						} else {
-							hashesString += hash + ", ";
-						}
 
 						console.log(hash);
 
@@ -138,12 +131,18 @@ var main = function () {
 							newNotificationIndices.push(j);
 						}
 					}
+					
+					var hashesString = userNotificationHashes.join(",");
 
 					console.log("NEW NOTIFICATIONS: " + newNotificationIndices.length);
 
 					// insert 'userNotificationHashes' in database
 					console.log("query: " + hashesString);
-					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}' WHERE token = '" + user.token + "'", (err, res) => {});
+					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}' WHERE token = '" + user.token + "'", (err, res) => {
+						console.log(JSON.stringify(err));
+						console.log(JSON.stringify(res));
+						console.log("---------");
+					});
 
 					if (newNotificationIndices.length > 0) { // new notifications -> request fcm
 						var notificationCount = newNotificationIndices.length;
