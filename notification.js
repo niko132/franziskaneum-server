@@ -186,6 +186,9 @@ var main = function () {
 				
 				// pgClient.end();
 				canClose = true;
+				if (openQueries == 0) {
+					pgClient.end();
+				}
 			});
 		});
 	});
