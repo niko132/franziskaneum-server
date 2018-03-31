@@ -1,9 +1,7 @@
 var CRC32 = require('crc-32');
 var request = require('request');
 var xml2js = require('xml2js');
-const {
-	Client
-} = require('pg');
+const { Client } = require('pg');
 
 function hasCourse(searchString, courses) {
 	for (var i = 0; i < courses.length; i++) {
@@ -36,9 +34,7 @@ var main = function () {
 
 			// TODO: gucken ob Vertretungsplan neu ist
 
-			const pgClient = new Client({
-					connectionString: process.env.DATABASE_URL,
-				});
+			const pgClient = new Client();
 			await pgClient.connect();
 
 			var res = await pgClient.query("SELECT * FROM users");
