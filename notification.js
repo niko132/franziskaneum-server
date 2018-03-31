@@ -139,10 +139,12 @@ var main = function () {
 					// insert 'userNotificationHashes' in database
 					console.log("query: " + hashesString);
 					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}' WHERE token = '" + user.token + "'", (err, res) => {
-						console.log(JSON.stringify(err));
-						console.log(JSON.stringify(res));
+						console.log(err);
+						console.log(res);
 						console.log("---------");
 					});
+					
+					console.log("Token: " + user.token);
 
 					if (newNotificationIndices.length > 0) { // new notifications -> request fcm
 						var notificationCount = newNotificationIndices.length;
