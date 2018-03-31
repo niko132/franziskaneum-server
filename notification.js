@@ -39,8 +39,7 @@ var main = function () {
 				});
 			pgClient.connect();
 			
-			var openQueries = 0;
-			var canClose = false;
+			var queryPromises = [];
 
 			pgClient.query("SELECT * FROM users", (err, res) => {
 				for (var i = 0; i < res.rows.length; i++) {
@@ -141,19 +140,11 @@ var main = function () {
 
 					// insert 'userNotificationHashes' in database
 					console.log("query: " + hashesString);
-					openQueries = openQueries + 1;
-					console.log("OpenQueries: " + openQueries);
-					pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}' WHERE token = '" + user.token + "'", (err, res) => {
-						openQueries = openQueries - 1;
-						
-						console.log("OpenQueries: " + openQueries);
-						
-						if (openQueries == 0 && canClose) {
-							pgClient.end();
-						}
-					});
-					
-					console.log("Token: " + user.token);
+					queryPromises.push(new Promise(function(resolve, reject) {
+						pgClient.query("UPDATE users SET notification_hashes = '{" + hashesString + "}' WHERE token = '" + user.token + "'", (err, res) => {
+							resolve();
+						});
+					}));
 
 					if (newNotificationIndices.length > 0) { // new notifications -> request fcm
 						var notificationCount = newNotificationIndices.length;
@@ -184,11 +175,9 @@ var main = function () {
 					}
 				}
 				
-				// pgClient.end();
-				canClose = true;
-				if (openQueries == 0) {
+				Promise.all(queryPromises).then(function() {
 					pgClient.end();
-				}
+				});
 			});
 		});
 	});
