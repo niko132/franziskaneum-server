@@ -13,9 +13,9 @@
     <string name="message_enter_password">Dieser Inhalt ist passwortgeschützt. Um ihn anzuschauen, gib bitte dein Passwort ein</string>
     <string name="no_connection">Keine Verbindung</string>
     <string name="unknown_error">Unbekannter Fehler</string>
-    <string type="id" name="recycler_item_position"/>
-    <string type="id" name="picasso_target"/>
-    <string type="id" name="news_image_description"/>
+    <string name="recycler_item_position" type="id" />
+    <string name="picasso_target" type="id" />
+    <string name="news_image_description" type="id" />
     <string name="subject">Fach</string>
     <string name="room">Raum</string>
     <string name="teacher">Lehrer</string>
@@ -63,7 +63,8 @@
     <string name="subjects">Fächer</string>
     <string name="specific_tasks">Besondere Aufgaben</string>
     <string name="older_posts">Ältere Posts</string>
-    <string name="transition_news_image">transition_news_image</string>
+    <string name="transition_news_image">de.franziskaneum.news:image</string>
+    <string name="transition_toolbar">de.franziskaneum:toolbar</string>
     <string name="news_url">http://www.franziskaneum.de/wordpress/category/aktuelles/</string>
     <string name="vplan_url">http://www.franziskaneum.de/wordpress/schule/planung/vertretungsplan/</string>
     <string name="teacher_url">http://www.franziskaneum.de/wordpress/wer-wir-sind/lehrerliste/</string>
@@ -89,16 +90,16 @@
     <string name="bugreport_franziskaneum_app">Fehlerbericht Franziskaneum App</string>
     <string name="wrong_password">Falsches Passwort</string>
     <string name="delete_all">Alles löschen</string>
-    <string name="transfer_week">Woche übertragen</string>
+    <string name="copy_week">Woche kopieren</string>
     <string name="are_you_sure_you_want_to_delete_your_whole_timetable">Bist du sicher, dass du deinen kompletten Stundenplan löschen möchtest?</string>
     <string name="a_week">A Woche</string>
     <string name="b_week">B Woche</string>
     <string name="delete_week">Woche löschen</string>
-    <string name="all_subjects_of_the_target_week_will_be_overwritten_during_the_transfer">Achtung, bei der Übertragung werden alle Unterrichtsstunden der Ziel-Woche überschrieben</string>
+    <string name="all_subjects_of_the_target_week_will_be_overwritten">Achtung, beim kopieren werden alle Unterrichtsstunden der Ziel-Woche überschrieben</string>
     <string name="are_you_sure_you_want_to_delete_the_current_week">Bist du sicher, dass du die aktuelle Woche löschen möchtest?</string>
     <string name="vplan_notifications">Vertretungsplan Benachrichtigungen</string>
-    <string name="you_receive_notifications_in_case_of_changes_to_the_vplan">Du erhälst Benachrichtigungen bei Änderungen am Vertretungsplan</string>
-    <string name="you_dont_receive_notifications_in_case_of_changes_to_the_vplan">Du erhälst keine Benachrichtigungen bei Änderungen am Vertretungsplan</string>
+    <string name="you_receive_notifications_in_case_of_changes_to_the_vplan">Du erhältst Benachrichtigungen bei Änderungen am Vertretungsplan</string>
+    <string name="you_dont_receive_notifications_in_case_of_changes_to_the_vplan">Du erhältst keine Benachrichtigungen bei Änderungen am Vertretungsplan</string>
     <string name="_freehour_">[ Freistunde ]</string>
     <string name="show_times">Zeiten anzeigen</string>
     <string name="changed_school_class">Klasse geändert</string>
@@ -110,4 +111,5 @@
     <string name="course_leader">Kursleiter</string>
     <string name="start_time">Beginn</string>
     <string name="duration">Dauer</string>
+    <string name="licenses">Lizenzen</string>
 </resources>

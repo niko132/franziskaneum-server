@@ -1,7 +1,11 @@
 package de.franziskaneum.timetable;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.TransitionManager;
@@ -10,16 +14,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
+import de.franziskaneum.Constants;
 import de.franziskaneum.R;
 import de.franziskaneum.settings.SettingsManager;
+import de.franziskaneum.utils.ClickableViewHolder;
 
 /**
  * Created by Niko on 16.02.2016.
  */
-public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<TimetableDayRecyclerAdapter.TimetableSingleHourViewHolder> {
 
     private static final int VIEW_TYPE_SINGLE_HOUR = 0;
     private static final int VIEW_TYPE_DOUBLE_HOUR = 1;
@@ -48,15 +56,15 @@ public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             }
     };
 
-    @Nullable
-    private View.OnClickListener onClickListener;
     private List<Timetable.TimetableData> timetableDay;
     private boolean showTimes = false;
     private SettingsManager settings;
     private int schoolClassStep = 5;
     private RecyclerView recyclerView;
+    private int dayIndex = 0;
+    private Fragment fragment;
 
-    public static class TimetableSingleHourViewHolder extends RecyclerView.ViewHolder {
+    public class TimetableSingleHourViewHolder extends ClickableViewHolder {
         public View contentContainer;
         public TextView hour;
         public TextView subject;
@@ -66,7 +74,7 @@ public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
         public TextView startTime;
         public TextView endTime;
 
-        public TimetableSingleHourViewHolder(View itemView) {
+        public TimetableSingleHourViewHolder(final View itemView) {
             super(itemView);
 
             contentContainer = itemView.findViewById(R.id.timetable_item_content_container);
@@ -84,25 +92,89 @@ public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             endTime = (TextView) itemView.findViewById(R.id.timetable_item_end_time);
         }
 
+        @Override
+        public void onClick(final int position, @Nullable final Context context) {
+            if (context != null && timetableDay != null && timetableDay.size() > position) {
+                final Timetable.TimetableData timetableData = timetableDay.get(position);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context,
+                        R.style.AlertDialogTheme);
+
+                // inflate the dialog main view
+                View dialogView = LayoutInflater.from(context).
+                        inflate(R.layout.dialog_timetable_detail, null);
+
+                // set the view to the dialog builder
+                builder.setView(dialogView);
+
+                ((TextView) dialogView.findViewById(R.id.dialog_timetable_detail_title))
+                        .setText(timetableData.getHour() + "." + context.getString(R.string.hour));
+                ((TextView) dialogView.findViewById(R.id.dialog_timetable_detail_subject))
+                        .setText(timetableData.getSubject());
+                ((TextView) dialogView.findViewById(R.id.dialog_timetable_detail_room))
+                        .setText(timetableData.getRoom());
+                ((TextView) dialogView.findViewById(R.id.dialog_timetable_detail_teacher))
+                        .setText(timetableData.getTeacherOrSchoolClass());
+
+                final AlertDialog dialog = builder.create();
+
+                dialogView.findViewById(R.id.dialog_timetable_detail_edit)
+                        .setOnClickListener(new View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                Calendar selectedDay = Calendar.getInstance();
+                                selectedDay.set(Calendar.DAY_OF_WEEK, 2 + dayIndex);
+
+                                Intent editSubjectIntent = new Intent(context,
+                                        TimetableEditSubjectActivity.class);
+                                editSubjectIntent.putExtra(
+                                        TimetableEditSubjectActivity.EXTRA_DAY_OF_WEEK,
+                                        selectedDay.getDisplayName(Calendar.DAY_OF_WEEK,
+                                                Calendar.LONG, Locale.getDefault()));
+                                editSubjectIntent.putExtra(TimetableEditSubjectActivity.EXTRA_HOUR,
+                                        Timetable.getHourForIndex(timetableDay, position));
+                                editSubjectIntent.putExtra(
+                                        TimetableEditSubjectActivity.EXTRA_SUBJECT_TO_EDIT,
+                                        timetableData);
+
+                                // workaround for not called onActivityResult in nested Fragments (Android Bug)
+                                fragment.getParentFragment().startActivityForResult(editSubjectIntent,
+                                        Constants.ACTIVITY_REQUEST_CODE_TIMETABLE_EDIT_SUBJECT);
+                            }
+
+                        });
+
+                dialogView.findViewById(R.id.dialog_timetable_detail_delete)
+                        .setOnClickListener(new View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                timetableDay.remove(position);
+                                Timetable.correctHours(timetableDay);
+
+                                notifyDataSetChanged();
+                            }
+
+                        });
+
+                dialog.show();
+            }
+        }
+
     }
 
-    public static class TimetableDoubleHourViewHolder extends
-            RecyclerView.ViewHolder {
-        public View contentContainer;
-        public TextView hour1;
+    public class TimetableDoubleHourViewHolder extends TimetableSingleHourViewHolder {
         public TextView hour2;
-        public TextView subject;
-        public TextView room;
-        public TextView teacherOrSchoolClass;
-        public View timesContainer;
-        public TextView startTime;
-        public TextView endTime;
 
         public TimetableDoubleHourViewHolder(View itemView) {
             super(itemView);
 
             contentContainer = itemView.findViewById(R.id.timetable_item_content_container);
-            hour1 = (TextView) itemView.findViewById(R.id.timetable_item_hour1);
+            hour = (TextView) itemView.findViewById(R.id.timetable_item_hour1);
             hour2 = (TextView) itemView.findViewById(R.id.timetable_item_hour2);
             subject = (TextView) itemView
                     .findViewById(R.id.timetable_item_subject);
@@ -119,14 +191,14 @@ public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
 
     }
 
-    public TimetableDayRecyclerAdapter(@Nullable View.OnClickListener onClickListener,
-                                       RecyclerView recyclerView) {
-        this.onClickListener = onClickListener;
+    public TimetableDayRecyclerAdapter(RecyclerView recyclerView, int dayIndex, Fragment fragment) {
         settings = SettingsManager.getInstance();
         schoolClassStep = settings.getSchoolClassStep();
         this.recyclerView = recyclerView;
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHandlerCallback());
         itemTouchHelper.attachToRecyclerView(recyclerView);
+        this.dayIndex = dayIndex;
+        this.fragment = fragment;
     }
 
     public void setTimetableDay(@Nullable List<Timetable.TimetableData> timetableDay) {
@@ -157,7 +229,7 @@ public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TimetableSingleHourViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         if (viewType == VIEW_TYPE_SINGLE_HOUR) {
@@ -170,117 +242,75 @@ public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(TimetableSingleHourViewHolder holder, int position) {
         String freehour = holder.itemView.getContext().getString(R.string._freehour_);
 
         if (timetableDay != null && timetableDay.size() > position) {
             Timetable.TimetableData timetableData = timetableDay.get(position);
 
-            if (holder instanceof TimetableSingleHourViewHolder) {
-                TimetableSingleHourViewHolder viewHolder = (TimetableSingleHourViewHolder) holder;
-                viewHolder.hour.setText(timetableData.getHour() + ".");
-                String subject = timetableData.getSubject();
-                viewHolder.subject.setText(subject == null || subject.isEmpty() ? freehour : subject);
-                viewHolder.room.setText(timetableData.getRoom());
-                viewHolder.teacherOrSchoolClass.setText(timetableData.getTeacherOrSchoolClass());
-                viewHolder.timesContainer.setVisibility(showTimes ? View.VISIBLE : View.GONE);
+            holder.hour.setText(timetableData.getHour() + ".");
+            String subject = timetableData.getSubject();
 
-                String[][] times = null;
+            holder.subject.setText(timetableData.isFreehour() ? freehour : subject);
+            holder.room.setText(timetableData.getRoom());
+            holder.teacherOrSchoolClass.setText(timetableData.getTeacherOrSchoolClass());
+            holder.timesContainer.setVisibility(showTimes ? View.VISIBLE : View.GONE);
 
-                if (settings.isTeacher()) {
-                    String schoolClass = timetableData.getTeacherOrSchoolClass();
-                    if (schoolClass != null && !schoolClass.isEmpty()) {
-                        if (schoolClass.contains("/")) {
-                            String schoolClassStepString = schoolClass.substring(0, schoolClass.indexOf("/"));
-                            try {
-                                int schoolClassStep = Integer.parseInt(schoolClassStepString);
-                                times = schoolClassStep >= 5 && schoolClassStep < 7 ? TIMES[0] : TIMES[1];
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        }
+            String[][] times = null;
 
-                        if (schoolClass.contains(" ") && times == null) {
-                            String schoolClassStepString = schoolClass.substring(0, schoolClass.indexOf(" "));
-                            try {
-                                int schoolClassStep = Integer.parseInt(schoolClassStepString);
-                                times = schoolClassStep >= 5 && schoolClassStep < 7 ? TIMES[0] : TIMES[1];
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
+            if (settings.isTeacher()) {
+                String schoolClass = timetableData.getTeacherOrSchoolClass();
+                if (schoolClass != null && !schoolClass.isEmpty()) {
+                    if (schoolClass.contains("/")) {
+                        String schoolClassStepString = schoolClass.substring(0, schoolClass.indexOf("/"));
+                        try {
+                            int schoolClassStep = Integer.parseInt(schoolClassStepString);
+                            times = schoolClassStep >= 5 && schoolClassStep < 7 ? TIMES[0] : TIMES[1];
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                         }
                     }
 
-                    if (times == null)
-                        times = TIMES[1];
-                } else {
-                    times = schoolClassStep < 7 ? TIMES[0] : TIMES[1];
+                    if (schoolClass.contains(" ") && times == null) {
+                        String schoolClassStepString = schoolClass.substring(0, schoolClass.indexOf(" "));
+                        try {
+                            int schoolClassStep = Integer.parseInt(schoolClassStepString);
+                            times = schoolClassStep >= 5 && schoolClassStep < 7 ? TIMES[0] : TIMES[1];
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
-                int hourIndex = Timetable.getHourForIndex(timetableDay, position) - 1;
-                if (hourIndex < times.length) {
-                    String[] subjectTimes = times[hourIndex];
-                    viewHolder.startTime.setText(subjectTimes[0]);
-                    viewHolder.endTime.setText(subjectTimes[1]);
-                }
-
-                if (onClickListener != null) {
-                    viewHolder.contentContainer.setOnClickListener(onClickListener);
-                    viewHolder.contentContainer.setTag(R.string.recycler_item_position, position);
-                }
+                if (times == null)
+                    times = TIMES[1];
             } else {
+                times = schoolClassStep < 7 ? TIMES[0] : TIMES[1];
+            }
+
+            int hourIndex = Timetable.getHourForIndex(timetableDay, position) - 1;
+            if (hourIndex < times.length) {
+                String[] subjectTimes = times[hourIndex];
+                holder.startTime.setText(subjectTimes[0]);
+                holder.endTime.setText(subjectTimes[1]);
+            }
+
+
+            if (holder instanceof TimetableDoubleHourViewHolder) {
                 TimetableDoubleHourViewHolder viewHolder = (TimetableDoubleHourViewHolder) holder;
-                viewHolder.hour1.setText(timetableData.getHour() + ".");
                 viewHolder.hour2.setText((timetableData.getHour() + 1) + ".");
-                String subject = timetableData.getSubject();
-                viewHolder.subject.setText(subject == null || subject.isEmpty() ? freehour : subject);
-                viewHolder.room.setText(timetableData.getRoom());
-                viewHolder.teacherOrSchoolClass.setText(timetableData.getTeacherOrSchoolClass());
-                viewHolder.timesContainer.setVisibility(showTimes ? View.VISIBLE : View.GONE);
 
-                String[][] times = null;
-
-                if (settings.isTeacher()) {
-                    String schoolClass = timetableData.getTeacherOrSchoolClass();
-                    if (schoolClass != null && !schoolClass.isEmpty()) {
-                        if (schoolClass.contains("/")) {
-                            String schoolClassStepString = schoolClass.substring(0, schoolClass.indexOf("/"));
-                            try {
-                                int schoolClassStep = Integer.parseInt(schoolClassStepString);
-                                times = schoolClassStep >= 5 && schoolClassStep < 7 ? TIMES[0] : TIMES[1];
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        if (schoolClass.contains(" ") && times == null) {
-                            String schoolClassStepString = schoolClass.substring(0, schoolClass.indexOf(" "));
-                            try {
-                                int schoolClassStep = Integer.parseInt(schoolClassStepString);
-                                times = schoolClassStep >= 5 && schoolClassStep < 7 ? TIMES[0] : TIMES[1];
-                            } catch (NumberFormatException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-
-                    if (times == null)
-                        times = TIMES[1];
-                } else {
-                    times = schoolClassStep < 7 ? TIMES[0] : TIMES[1];
-                }
-				
-                int hourIndex = Timetable.getHourForIndex(timetableDay, position) - 1;
                 if (hourIndex + 1 < times.length) {
                     String[] subjectTimes1 = times[hourIndex];
                     String[] subjectTimes2 = times[hourIndex + 1];
                     viewHolder.startTime.setText(subjectTimes1[0]);
                     viewHolder.endTime.setText(subjectTimes2[1]);
                 }
-
-                if (onClickListener != null) {
-                    viewHolder.contentContainer.setOnClickListener(onClickListener);
-                    viewHolder.contentContainer.setTag(R.string.recycler_item_position, position);
+            } else {
+                if (hourIndex < times.length) {
+                    String[] subjectTimes = times[hourIndex];
+                    holder.startTime.setText(subjectTimes[0]);
+                    holder.endTime.setText(subjectTimes[1]);
                 }
             }
         }
@@ -320,8 +350,8 @@ public class TimetableDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
                 }
             }
             Timetable.correctHours(timetableDay);
-            onBindViewHolder(viewHolder, toPosition);
-            onBindViewHolder(target, fromPosition);
+            onBindViewHolder((TimetableSingleHourViewHolder) viewHolder, toPosition);
+            onBindViewHolder((TimetableSingleHourViewHolder) target, fromPosition);
             notifyItemMoved(fromPosition, toPosition);
             return true;
         }

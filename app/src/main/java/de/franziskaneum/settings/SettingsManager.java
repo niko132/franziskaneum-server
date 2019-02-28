@@ -30,6 +30,8 @@ public class SettingsManager {
     public static final String KEY_VPLAN_NOTIFICATION_DELETED = "vplan_notification_deleted";
     public static final String KEY_TEACHER_LIST_LAST_REFRESH = "teacher_list_last_refresh";
     public static final String KEY_SCHOOL_CLASS_LAST_MODIFIED = "school_class_last_modified";
+    public static final String KEY_IGNORED_APP_UPDATE_VERSION = "ignore_update";
+    public static final String KEY_TIMETABLE_SHOW_TIMES = "timetable_show_times";
 
     private static SettingsManager instance;
 
@@ -51,6 +53,8 @@ public class SettingsManager {
     private boolean vplanNotificationDeleted;
     private long teacherListLastRefresh;
     private long schoolClassLastModified;
+    private int ignoredAppUpdateVersion;
+    private boolean timetableShowTimes;
 
     // preference listener
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -74,6 +78,8 @@ public class SettingsManager {
         teacherListLastRefresh = prefs.getLong(KEY_TEACHER_LIST_LAST_REFRESH, 0);
         schoolClassLastModified = prefs.getLong(KEY_SCHOOL_CLASS_LAST_MODIFIED,
                 Calendar.getInstance().getTimeInMillis());
+        ignoredAppUpdateVersion = prefs.getInt(KEY_IGNORED_APP_UPDATE_VERSION, 0);
+        timetableShowTimes = prefs.getBoolean(KEY_TIMETABLE_SHOW_TIMES, false);
 
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
@@ -139,6 +145,14 @@ public class SettingsManager {
                         schoolClassLastModified = prefs.getLong(KEY_SCHOOL_CLASS_LAST_MODIFIED,
                                 schoolClassLastModified);
                         break;
+                    case KEY_IGNORED_APP_UPDATE_VERSION:
+                        ignoredAppUpdateVersion = prefs.getInt(KEY_IGNORED_APP_UPDATE_VERSION,
+                                ignoredAppUpdateVersion);
+                        break;
+                    case KEY_TIMETABLE_SHOW_TIMES:
+                        timetableShowTimes = prefs.getBoolean(KEY_TIMETABLE_SHOW_TIMES,
+                                timetableShowTimes);
+                        break;
                 }
 
                 Intent settingsChangedBroadcastIntent = new Intent(ACTION_SETTINGS_CHANGED);
@@ -150,7 +164,7 @@ public class SettingsManager {
     }
 
     public static void initInstance(Context context) {
-        instance = new SettingsManager(context);
+        instance = new SettingsManager(context.getApplicationContext());
     }
 
     public static SettingsManager getInstance() {
@@ -296,5 +310,23 @@ public class SettingsManager {
     public void setSchoolClassLastModified(long schoolClassLastModified) {
         this.schoolClassLastModified = schoolClassLastModified;
         prefs.edit().putLong(KEY_SCHOOL_CLASS_LAST_MODIFIED, schoolClassLastModified).apply();
+    }
+
+    public int getIgnoredAppUpdateVersion() {
+        return ignoredAppUpdateVersion;
+    }
+
+    public void setIgnoredAppUpdateVersion(int ignoredAppUpdateVersion) {
+        this.ignoredAppUpdateVersion = ignoredAppUpdateVersion;
+        prefs.edit().putInt(KEY_IGNORED_APP_UPDATE_VERSION, ignoredAppUpdateVersion).apply();
+    }
+
+    public boolean getTimetableShowTimes() {
+        return timetableShowTimes;
+    }
+
+    public void setTimetableShowTimes(boolean timetableShowTimes) {
+        this.timetableShowTimes = timetableShowTimes;
+        prefs.edit().putBoolean(KEY_TIMETABLE_SHOW_TIMES, timetableShowTimes).apply();
     }
 }

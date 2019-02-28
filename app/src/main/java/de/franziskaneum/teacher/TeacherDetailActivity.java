@@ -13,7 +13,7 @@ import android.widget.TextView;
 import de.franziskaneum.FranzCallback;
 import de.franziskaneum.R;
 import de.franziskaneum.Status;
-import de.franziskaneum.Utils;
+import de.franziskaneum.utils.Utils;
 
 /**
  * Created by Niko on 23.02.2016.

@@ -1,15 +1,15 @@
 package de.franziskaneum;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+
 import java.util.Calendar;
 
 import de.franziskaneum.settings.AppUpdateService;
 import de.franziskaneum.settings.SettingsManager;
 import de.franziskaneum.vplan.VPlanNotificationManager;
-
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 
 public class BroadcastReceiver extends android.content.BroadcastReceiver {
 
@@ -24,8 +24,7 @@ public class BroadcastReceiver extends android.content.BroadcastReceiver {
                 VPlanNotificationManager.getInstance().makeNotificationAsync(VPlanNotificationManager.Mode.SHOW_ONLY);
 
                 // set the alarm for appUpdate
-                Intent updateIntent = new Intent(context,
-                        AppUpdateService.class);
+                Intent updateIntent = new Intent(context, AppUpdateService.class);
                 PendingIntent pendingIntent = PendingIntent.getService(context,
                         Constants.PENDING_INTENT_ALARM_APP_UPDATE_SERVICE,
                         updateIntent, PendingIntent.FLAG_UPDATE_CURRENT);

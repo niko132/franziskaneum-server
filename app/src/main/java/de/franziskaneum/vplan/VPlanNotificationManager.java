@@ -1,5 +1,6 @@
 package de.franziskaneum.vplan;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -14,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
-import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -42,8 +42,8 @@ public class VPlanNotificationManager {
             "de.franziskaneum.vplan.VPlanNotificationManager.action.NEW_VPLAN_AVAILABLE";
     public static final String ACTION_NOTIFICATION_DELETED =
             "de.franziskaneum.vplan.VPlanNotificationManager.action.NOTIFICATION_DELETED";
-
     private static final String VPLAN_NOTIFICATION_FILENAME = "vplan_notification.json";
+    private static final String NOTIFICATION_CHANNEL_ID_VPLAN = "vplan";
 
     private static VPlanNotificationManager instance;
 
@@ -93,8 +93,6 @@ public class VPlanNotificationManager {
     }
 
     void saveNotificationsAsync(@Nullable final VPlanNotification vplanNotification) {
-        Toast.makeText(context.getApplicationContext(), "saving nots: " + vplanNotification, Toast.LENGTH_LONG).show();
-
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -152,56 +150,61 @@ public class VPlanNotificationManager {
         }).start();
     }
 
-    ReturnValue getNotificationFromVPlan(@Nullable final VPlan vplan) {
+    private ReturnValue getNotificationFromVPlan(@Nullable final VPlan vplan) {
         if (vplan != null) {
             if (settings.isTeacher()) {
                 String teacherShortcut = settings.getTeacherShortcut();
-                VPlanNotification vplanNotification = null;
 
-                for (VPlan.VPlanDayData vplanDay : vplan) {
-                    VPlanNotification.VPlanNotificationDay vplanNotificationDay = null;
+                if (teacherShortcut != null && !teacherShortcut.isEmpty()) {
+                    VPlanNotification vplanNotification = null;
 
-                    if (vplanDay.getTableData() != null) {
-                        for (VPlan.VPlanDayData.VPlanTableData tableRow : vplanDay.getTableData()) {
-                            if (TeacherList.TeacherData.teacherShortcutInString(tableRow.getTeacher() + " " + tableRow.getInfo(), teacherShortcut) != null) {
-                                if (vplanNotification == null)
-                                    vplanNotification = new VPlanNotification();
-                                if (vplanNotificationDay == null) {
-                                    vplanNotificationDay = new VPlanNotification.VPlanNotificationDay();
-                                    vplanNotificationDay.setTitle(vplanDay.getTitle());
-                                    vplanNotification.add(vplanNotificationDay);
+                    for (VPlan.VPlanDayData vplanDay : vplan) {
+                        VPlanNotification.VPlanNotificationDay vplanNotificationDay = null;
+
+                        if (vplanDay.getTableData() != null) {
+                            for (VPlan.VPlanDayData.VPlanTableData tableRow : vplanDay.getTableData()) {
+                                if (TeacherList.TeacherData.teacherShortcutInString(tableRow.getTeacher() + " " + tableRow.getInfo(), teacherShortcut) != null) {
+                                    if (vplanNotification == null)
+                                        vplanNotification = new VPlanNotification();
+                                    if (vplanNotificationDay == null) {
+                                        vplanNotificationDay = new VPlanNotification.VPlanNotificationDay();
+                                        vplanNotificationDay.setTitle(vplanDay.getTitle());
+                                        vplanNotification.add(vplanNotificationDay);
+                                    }
+
+                                    vplanNotificationDay.addNotification(tableRow.getNotificationText(context));
                                 }
+                            }
+                        }
 
-                                vplanNotificationDay.addNotification(tableRow.getNotificationText(context));
+                        if (vplanDay.getChangesSupervision() != null && TeacherList.TeacherData.teacherShortcutInString(vplanDay.getChangesSupervision(), teacherShortcut) != null) {
+                            for (String line : vplanDay.getChangesSupervision().split("\n")) {
+                                if (TeacherList.TeacherData.teacherShortcutInString(line, teacherShortcut) != null) {
+                                    if (vplanNotification == null)
+                                        vplanNotification = new VPlanNotification();
+                                    if (vplanNotificationDay == null) {
+                                        vplanNotificationDay = new VPlanNotification.VPlanNotificationDay();
+                                        vplanNotificationDay.setTitle(vplanDay.getTitle());
+                                        vplanNotification.add(vplanNotificationDay);
+                                    }
+
+                                    vplanNotificationDay.addNotification(line);
+                                }
                             }
                         }
                     }
 
-                    if (vplanDay.getChangesSupervision() != null && TeacherList.TeacherData.teacherShortcutInString(vplanDay.getChangesSupervision(), teacherShortcut) != null) {
-                        for (String line : vplanDay.getChangesSupervision().split("\n")) {
-                            if (TeacherList.TeacherData.teacherShortcutInString(line, teacherShortcut) != null) {
-                                if (vplanNotification == null)
-                                    vplanNotification = new VPlanNotification();
-                                if (vplanNotificationDay == null) {
-                                    vplanNotificationDay = new VPlanNotification.VPlanNotificationDay();
-                                    vplanNotificationDay.setTitle(vplanDay.getTitle());
-                                    vplanNotification.add(vplanNotificationDay);
-                                }
-
-                                vplanNotificationDay.addNotification(line);
-                            }
-                        }
-                    }
+                    return new ReturnValue(Status.OK, vplanNotification);
+                } else {
+                    return new ReturnValue(Status.UNKNOWN_ERROR);
                 }
-
-                return new ReturnValue(Status.OK, vplanNotification);
             } else {
                 final int schoolClassStep = settings.getSchoolClassStep();
 
                 if (schoolClassStep > 10) {
                     ReturnValue rv = TimetableManager.getInstance().getTimetable();
 
-                    if (rv.status == Status.OK && rv.objects.length > 0 && rv.objects[0] != null) {
+                    if (rv.status == Status.OK && rv.objects != null && rv.objects.length > 0) {
                         Timetable timetable = (Timetable) rv.objects[0];
                         VPlanNotification vplanNotification = null;
 
@@ -313,6 +316,22 @@ public class VPlanNotificationManager {
                         }
                     } else
                         vplanDay.setTableData(null);
+
+                    if (vplanDay.getExamData() != null && !vplanDay.getExamData().isEmpty() && teacherShortcut != null && !teacherShortcut.isEmpty()) {
+                        for (int j = vplanDay.getExamData().size() - 1; j >= 0; j--) {
+                            VPlan.VPlanDayData.VPlanExamData vplanExamData =
+                                    vplanDay.getExamData().get(j);
+
+                            if (TeacherList.TeacherData.teacherShortcutInString(
+                                    vplanExamData.getTeacher() + " " + vplanExamData.getInfo(),
+                                    teacherShortcut) == null)
+                                vplanDay.removeExamData(j);
+                        }
+                    } else
+                        vplanDay.setExamData(null);
+
+                    if (vplanDay.getTableData() == null && vplanDay.getExamData() == null)
+                        filteredVPlan.remove(i);
                 }
             } else {
                 final int schoolClassStep = settings.getSchoolClassStep();
@@ -320,19 +339,17 @@ public class VPlanNotificationManager {
                 if (schoolClassStep >= 11) {
                     ReturnValue rv = TimetableManager.getInstance().getTimetable();
 
-                    if (Status.OK == rv.status && rv.objects.length > 0 && rv.objects[0] != null) {
+                    if (Status.OK == rv.status && rv.objects != null && rv.objects.length > 0) {
                         Timetable timetable = (Timetable) rv.objects[0];
 
                         for (int i = filteredVPlan.size() - 1; i >= 0; i--) {
-                            VPlan.VPlanDayData notificationDay = filteredVPlan.get(i);
+                            VPlan.VPlanDayData vplanDay = filteredVPlan.get(i);
 
-                            if (notificationDay.getTableData() != null) {
-                                for (int j =
-                                     notificationDay.getTableData().size() - 1;
-                                     j >= 0; j--) {
+                            if (vplanDay.getTableData() != null) {
+                                for (int j = vplanDay.getTableData().size() - 1; j >= 0; j--) {
                                     VPlan.VPlanDayData.VPlanTableData
                                             notificationTableRow =
-                                            notificationDay.getTableData().get(j);
+                                            vplanDay.getTableData().get(j);
 
                                     if (notificationTableRow.getSchoolClass() == null
                                             || !notificationTableRow.getSchoolClass().
@@ -340,12 +357,25 @@ public class VPlanNotificationManager {
                                             !timetable.hasCourse(
                                                     notificationTableRow.
                                                             getSchoolClass()))
-                                        notificationDay.removeTableData(j);
+                                        vplanDay.removeTableData(j);
                                 }
+                            }
 
-                                if (notificationDay.getTableData() == null)
-                                    filteredVPlan.remove(i);
-                            } else
+                            if (vplanDay.getExamData() != null) {
+                                for (int j = vplanDay.getExamData().size() - 1; j >= 0; j--) {
+                                    VPlan.VPlanDayData.VPlanExamData vplanExamData =
+                                            vplanDay.getExamData().get(j);
+
+                                    if (vplanExamData.getSchoolClass() == null ||
+                                            !vplanExamData.getSchoolClass().contains(
+                                                    String.valueOf(schoolClassStep)) ||
+                                            vplanExamData.getCourse() == null ||
+                                            !timetable.hasCourse(vplanExamData.getCourse()))
+                                        vplanDay.removeExamData(j);
+                                }
+                            }
+
+                            if (vplanDay.getTableData() == null && vplanDay.getExamData() == null)
                                 filteredVPlan.remove(i);
                         }
                     }
@@ -353,19 +383,21 @@ public class VPlanNotificationManager {
                     int schoolClass = settings.getSchoolClass();
 
                     for (int i = filteredVPlan.size() - 1; i >= 0; i--) {
-                        VPlan.VPlanDayData notificationDay = filteredVPlan.get(i);
-                        if (notificationDay.getTableData() != null) {
-                            for (int j = notificationDay.getTableData().size() - 1; j >= 0; j--) {
-                                VPlan.VPlanDayData.VPlanTableData notificationTableRow = notificationDay.getTableData().get(j);
+                        VPlan.VPlanDayData vplanDay = filteredVPlan.get(i);
+
+                        if (vplanDay.getTableData() != null) {
+                            for (int j = vplanDay.getTableData().size() - 1; j >= 0; j--) {
+                                VPlan.VPlanDayData.VPlanTableData notificationTableRow = vplanDay.getTableData().get(j);
                                 if (notificationTableRow.getSchoolClass() == null ||
                                         !notificationTableRow.getSchoolClass().
                                                 contains(schoolClassStep + "/" + schoolClass))
-                                    notificationDay.removeTableData(j);
+                                    vplanDay.removeTableData(j);
                             }
+                        }
 
-                            if (notificationDay.getTableData() == null)
-                                filteredVPlan.remove(i);
-                        } else
+                        vplanDay.setExamData(null);
+
+                        if (vplanDay.getTableData() == null)
                             filteredVPlan.remove(i);
                     }
                 }
@@ -401,7 +433,7 @@ public class VPlanNotificationManager {
 
         ReturnValue rv = getNotificationFromVPlan(vplan);
 
-        if (Status.OK == rv.status && rv.objects.length > 0 && rv.objects[0] != null) {
+        if (Status.OK == rv.status && rv.objects != null && rv.objects.length > 0) {
             VPlanNotification downloadedVPlanNotification = (VPlanNotification) rv.objects[0];
             final VPlanNotification shortDownloadedVPlanNotification = removeOldDays(downloadedVPlanNotification);
 
@@ -469,7 +501,16 @@ public class VPlanNotificationManager {
         if (!settings.isVPlanNotificationEnabled() || vplanNotification == null || vplanNotification.isEmpty())
             removeNotification(Constants.NOTIFICATION_ID_VPLAN);
         else {
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                String name = context.getString(R.string.vplan);
+                NotificationChannel vplanChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID_VPLAN,
+                        name, NotificationManager.IMPORTANCE_HIGH);
+                nm.createNotificationChannel(vplanChannel);
+            }
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_VPLAN);
             builder.setSmallIcon(R.drawable.ic_notification_vplan);
             builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
                     R.drawable.ic_launcher));
@@ -570,7 +611,6 @@ public class VPlanNotificationManager {
                 builder.setVibrate(new long[]{0, vibration});
             }
 
-            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             nm.notify(Constants.NOTIFICATION_ID_VPLAN, builder.build());
 
             // notification is new (not deleted)

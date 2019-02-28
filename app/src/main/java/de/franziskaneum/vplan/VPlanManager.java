@@ -29,14 +29,14 @@ import java.net.URL;
 import de.franziskaneum.FranzCallback;
 import de.franziskaneum.ReturnValue;
 import de.franziskaneum.Status;
-import de.franziskaneum.Network;
 import de.franziskaneum.settings.SettingsManager;
+import de.franziskaneum.utils.Network;
 
 /**
  * Created by Niko on 11.08.2016.
  */
 public class VPlanManager {
-    private static final String VPLAN_URL = "http://www.franziskaneum.de/vplan/vplank.xml";
+    private static final String VPLAN_URL = "https://www.franziskaneum.de/vplan/vplank.xml";
     private static final String CACHED_VPLAN_FILENAME = "vplan.xml";
     private static final String VPLAN_FILENAME = "vplan.json";
 

@@ -1,6 +1,5 @@
 package de.franziskaneum.news;
 
-import android.animation.Animator;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -8,11 +7,11 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,13 +20,12 @@ import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
 import android.transition.Fade;
 import android.transition.Slide;
-import android.transition.Transition;
+import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -46,10 +44,12 @@ import com.squareup.picasso.Target;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.franziskaneum.ChangeImageTransition;
+import de.franziskaneum.CircleImageView;
+import de.franziskaneum.CircularRevealTransition;
 import de.franziskaneum.FranzCallback;
 import de.franziskaneum.R;
 import de.franziskaneum.Status;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Niko on 27.02.2016.
@@ -137,7 +137,7 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
             }
 
             View anchor = findViewById(R.id.news_article_anchor);
-            ViewGroup.LayoutParams params = anchor.getLayoutParams();
+            final ViewGroup.LayoutParams params = anchor.getLayoutParams();
             params.height = parallaxImageHeight;
             anchor.setLayoutParams(params);
 
@@ -163,10 +163,16 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
             parallaxImage.setTag(R.string.picasso_target, target);
             Picasso.with(this).load(newsArticle.getBaseImage().getThumbnailUrl()).into(target);
 
+            ViewGroup.LayoutParams imageParams = parallaxImage.getLayoutParams();
+            imageParams.width = parallaxImageHeight;
+            imageParams.height = parallaxImageHeight;
+            parallaxImage.setLayoutParams(imageParams);
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Slide slide = new Slide();
-                slide.setSlideEdge(Gravity.BOTTOM);
+                Slide slide = new Slide(Gravity.BOTTOM);
                 slide.excludeTarget(android.R.id.statusBarBackground, true);
+                slide.excludeTarget(R.id.toolbar, true);
+                slide.setInterpolator(new LinearOutSlowInInterpolator());
                 slide.setDuration(500);
 
                 Fade fade = new Fade();
@@ -177,104 +183,37 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
                 TransitionSet transition = new TransitionSet();
                 transition.addTransition(slide);
                 transition.addTransition(fade);
-                transition.excludeTarget(android.R.id.navigationBarBackground, true);
 
                 getWindow().setEnterTransition(transition);
-                getWindow().setExitTransition(transition);
+                getWindow().setReturnTransition(transition);
+
+                getWindow().setSharedElementEnterTransition(new CircularRevealTransition().setDuration1(500).setInterpolator(new FastOutSlowInInterpolator()));
 
                 postponeEnterTransition();
-
-                getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
-                    @Override
-                    public void onTransitionStart(Transition transition) {
-
-                    }
-
-                    @Override
-                    public void onTransitionEnd(Transition transition) {
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                            if (!isFinishing() && !isDestroyed()) {
-                                int cx = parallaxImageHeight / 2;
-                                int cy = parallaxImageHeight / 2;
-
-                                smallImageSize = Math.max(parallaxImage.getWidth(), parallaxImage.getHeight());
-
-                                float startRadius = smallImageSize;
-                                float endRadius = parallaxImageHeight;
-
-                                Animator animator = ViewAnimationUtils.createCircularReveal(parallaxImage, cx, cy, startRadius, endRadius);
-                                animator.addListener(new Animator.AnimatorListener() {
-                                    @Override
-                                    public void onAnimationStart(Animator animator) {
-                                        ViewGroup.LayoutParams imageParams = parallaxImage.getLayoutParams();
-                                        imageParams.width = parallaxImageHeight;
-                                        imageParams.height = parallaxImageHeight;
-                                        parallaxImage.setLayoutParams(imageParams);
-                                        parallaxImage.setDisableCircularTransformation(true);
-                                    }
-
-                                    @Override
-                                    public void onAnimationEnd(Animator animator) {
-                                    }
-
-                                    @Override
-                                    public void onAnimationCancel(Animator animator) {
-
-                                    }
-
-                                    @Override
-                                    public void onAnimationRepeat(Animator animator) {
-
-                                    }
-                                });
-                                animator.start();
-
-                                getWindow().getEnterTransition().removeListener(this);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onTransitionCancel(Transition transition) {
-
-                    }
-
-                    @Override
-                    public void onTransitionPause(Transition transition) {
-
-                    }
-
-                    @Override
-                    public void onTransitionResume(Transition transition) {
-
-                    }
-                });
             } else {
-                ViewGroup.LayoutParams imageParams = parallaxImage.getLayoutParams();
-                imageParams.width = parallaxImageHeight;
-                imageParams.height = parallaxImageHeight;
-                parallaxImage.setLayoutParams(imageParams);
                 parallaxImage.setDisableCircularTransformation(true);
             }
 
-            final View decor = getWindow().getDecorView();
-            decor.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            observableScrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
-                public boolean onPreDraw() {
-                    decor.getViewTreeObserver().removeOnPreDrawListener(this);
+                public void onGlobalLayout() {
+                    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        onScrollChanged(lastScrollY, false, false);
+                        observableScrollView.scrollTo(0, (int) (parallaxImageHeight / 1.5f));
+                    } else {
+                        onScrollChanged(lastScrollY, false, false);
+                        observableScrollView.scrollTo(0, 0);
+                    }
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         startPostponedEnterTransition();
                     }
 
-                    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        onScrollChanged(lastScrollY, false, false);
-                        observableScrollView.smoothScrollTo(0, (int) (parallaxImageHeight / 1.5));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        observableScrollView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     } else {
-                        onScrollChanged(lastScrollY, false, false);
-                        observableScrollView.smoothScrollTo(0, 0);
+                        observableScrollView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                     }
-
-                    return true;
                 }
             });
         } else
@@ -290,7 +229,7 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         if (recyclerAdapter == null)
-            recyclerAdapter = new NewsArticleImageRecyclerAdapter(this);
+            recyclerAdapter = new NewsArticleImageRecyclerAdapter();
 
         recyclerView.setAdapter(recyclerAdapter);
 
@@ -303,7 +242,7 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
         if (newsArticle.getFullContent() == null ||
                 newsArticle.getFullContent().toString().isEmpty()) {
             if (newsArticle.getArticleUrl() != null && !newsArticle.getArticleUrl().isEmpty())
-                NewsManager.getInstance().getArticleAsync(newsArticle.getArticleUrl(),
+                NewsManager.getInstance(this).getArticleAsync(newsArticle.getArticleUrl(),
                         newsArticleCallback);
             else {
                 articleContent.setText(newsArticle.getPreviewContent());
@@ -324,7 +263,7 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
     private void generateToolbarColorFromBitmap(@Nullable Bitmap bitmap) {
         if (bitmap != null) {
             Palette.Builder builder = new Palette.Builder(bitmap);
-            builder.resizeBitmapSize(150);
+            builder.resizeBitmapArea(150);
             builder.generate(new Palette.PaletteAsyncListener() {
 
                 @Override
@@ -360,7 +299,7 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
                     toolbarColor = Color.HSVToColor(color);
 
                     // change the toolbarColor after the image is loaded
-                    onScrollChanged(lastScrollY, false, false);
+                     onScrollChanged(lastScrollY, false, false);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         Window window = getWindow();
@@ -400,6 +339,11 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
 
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom flags) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                        ChangeImageTransition changeImageTransition = new ChangeImageTransition();
+                        TransitionManager.beginDelayedTransition((ViewGroup) parallaxImage.getParent(), changeImageTransition.setDuration(250));
+                    }
+
                     parallaxImage.setImageBitmap(bitmap);
                     generateToolbarColorFromBitmap(bitmap);
                 }
@@ -437,58 +381,40 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
     @Override
     public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
         lastScrollY = scrollY;
-        if (backPressed && scrollY == 0)
-            exitReveal();
-        else {
-            if (newsArticle.hasBaseImage()) {
-                if (scrollY < 0)
-                    scrollY = 0;
 
-                int toolbarHeight = toolbar != null ? toolbar.getHeight() : 0;
+        if (newsArticle.hasBaseImage()) {
+            if (scrollY < 0)
+                scrollY = 0;
 
-                float a = ((float) parallaxImageHeight * 0.8f) - toolbarHeight;
+            int toolbarHeight = toolbar != null ? toolbar.getHeight() : 0;
 
-                float alpha = 0;
+            float a = ((float) parallaxImageHeight * 0.8f) - toolbarHeight;
 
-                if (scrollY >= a)
-                    alpha = Math.min(1, (scrollY - a)
-                            / (parallaxImageHeight - a - toolbarHeight));
+            float alpha = 0;
 
-                if (toolbar != null)
-                    toolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(alpha, toolbarColor));
+            if (scrollY >= a)
+                alpha = Math.min(1, (scrollY - a)
+                        / (parallaxImageHeight - a - toolbarHeight));
 
-                ViewHelper.setTranslationY((ViewGroup) parallaxImage.getParent(), scrollY / 2);
-            }
+            if (toolbar != null)
+                toolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(alpha, toolbarColor));
+
+            ViewHelper.setTranslationY((ViewGroup) parallaxImage.getParent(), scrollY / 2);
         }
     }
 
     @Override
     public void onDownMotionEvent() {
-        if (backPressed)
-            backPressed = false;
+
     }
 
     @Override
     public void onUpOrCancelMotionEvent(ScrollState scrollState) {
+
     }
 
     @Override
     public void onClick(View view) {
-        Object itemPositionTag = view.getTag(R.string.recycler_item_position);
-
-        if (itemPositionTag != null && itemPositionTag instanceof Integer) {
-            int itemPosition = (int) itemPositionTag;
-
-            Intent newsArticleImageGalleryIntent = new Intent(this, NewsArticleImageGalleryActivity.class);
-            newsArticleImageGalleryIntent.putParcelableArrayListExtra(
-                    NewsArticleImageGalleryActivity.EXTRA_NEWS_ARTICLE_IMAGES,
-                    (ArrayList<? extends Parcelable>) newsArticle.getImages());
-            newsArticleImageGalleryIntent.putExtra(
-                    NewsArticleImageGalleryActivity.EXTRA_START_IMAGE_INDEX, itemPosition);
-
-            startActivity(newsArticleImageGalleryIntent);
-        }
-
         Object descriptionTag = view.getTag(R.string.news_image_description);
 
         if (descriptionTag != null && descriptionTag instanceof News.NewsData.NewsArticleImage) {
@@ -509,73 +435,10 @@ public class NewsArticleActivity extends AppCompatActivity implements Observable
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                backPressed();
+                supportFinishAfterTransition();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        backPressed();
-    }
-
-    private void backPressed() {
-        if (hasBaseImage && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (!backPressed) {
-                backPressed = true;
-                onScrollChanged(lastScrollY, false, false);
-                observableScrollView.smoothScrollTo(0, 0);
-            }
-        } else
-            supportFinishAfterTransition();
-    }
-
-    private void exitReveal() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (!isFinishing() && !isDestroyed())
-                if (parallaxImage != null) {
-                    int cx = parallaxImageHeight / 2;
-                    int cy = parallaxImageHeight / 2;
-                    float startRadius = parallaxImageHeight;
-                    final float endRadius = smallImageSize;
-
-                    Animator animator = ViewAnimationUtils.createCircularReveal(parallaxImage, cx, cy, startRadius, endRadius);
-                    animator.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animator) {
-
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animator animator) {
-                            ViewGroup.LayoutParams imageParams = parallaxImage.getLayoutParams();
-                            imageParams.width = smallImageSize;
-                            imageParams.height = smallImageSize;
-                            parallaxImage.setLayoutParams(imageParams);
-                            parallaxImage.setDisableCircularTransformation(false);
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    supportFinishAfterTransition();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onAnimationCancel(Animator animator) {
-
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animator animator) {
-
-                        }
-                    });
-                    animator.start();
-                } else
-                    supportFinishAfterTransition();
-        }
     }
 }

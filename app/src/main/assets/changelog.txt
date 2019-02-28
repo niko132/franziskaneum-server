@@ -1,3 +1,5 @@
 ﻿• Fehler behoben
 
-• Diverse Verbesserungen
+• Einige Verbesserungen
+
+• Suchfunktion in der Lehrerliste

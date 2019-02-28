@@ -13,7 +13,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,6 +34,8 @@ import de.franziskaneum.R;
 import de.franziskaneum.Status;
 import de.franziskaneum.drawer.DrawerFragment;
 import de.franziskaneum.settings.SettingsManager;
+import de.franziskaneum.vplan.VPlan;
+import de.franziskaneum.vplan.VPlanManager;
 
 /**
  * Created by Niko on 16.02.2016.
@@ -44,6 +45,7 @@ public class TimetableFragment extends DrawerFragment implements
     private static final String KEY_SHOW_TIMES =
             "de.franziskaneum.timetable.TimetableFragment.key.SHOW_TIMES";
 
+    private SettingsManager settings;
     private TimetableManager timetableManager;
     private Timetable timetable;
     private int week = 0;
@@ -76,10 +78,13 @@ public class TimetableFragment extends DrawerFragment implements
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         timetableManager = TimetableManager.getInstance();
+        settings = SettingsManager.getInstance();
 
         if (timetable == null) {
             timetableManager.getTimetableAsync(timetableCallback);
         }
+
+        showTimes = settings.getTimetableShowTimes();
 
         if (savedInstanceState != null)
             showTimes = savedInstanceState.getBoolean(KEY_SHOW_TIMES, showTimes);
@@ -112,7 +117,7 @@ public class TimetableFragment extends DrawerFragment implements
 
         abWeekSpinner = (Spinner) root.findViewById(R.id.timetable_a_b_week_spinner);
 
-        if (abWeekAdapter == null) {
+        if (abWeekAdapter == null && getActivity() != null) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             if (actionBar != null) {
                 abWeekAdapter = ArrayAdapter.createFromResource(actionBar.getThemedContext(),
@@ -132,6 +137,41 @@ public class TimetableFragment extends DrawerFragment implements
     public void onResume() {
         super.onResume();
         toggleABWeek();
+        if (hasABWeek) {
+            VPlanManager.getInstance().getVPlanAsync(VPlanManager.Mode.CACHE, new FranzCallback() {
+                @Override
+                public void onCallback(int status, Object... objects) {
+                    if (status == Status.OK && objects.length > 1 && objects[1] != null) {
+                        VPlan vplan = (VPlan) objects[1];
+
+                        if (vplan.isEmpty())
+                            return;
+
+                        Calendar today = Calendar.getInstance();
+                        today.set(Calendar.HOUR_OF_DAY, 0);
+                        today.set(Calendar.MINUTE, 0);
+                        today.set(Calendar.SECOND, 0);
+                        today.set(Calendar.MILLISECOND, 0);
+
+                        VPlan.VPlanDayData vplanDay = vplan.get(0);
+                        for (VPlan.VPlanDayData vd : vplan) {
+                            if (vd.getCalendarDate().after(today))
+                                break;
+
+                            vplanDay = vd;
+                        }
+
+                        week = vplanDay.getCurrentWeek();
+                        if (timetable != null && timetable.size() > week) {
+                            abWeekSpinner.setSelection(week);
+                            pagerAdapter.setTimetableWeek(timetable.get(week));
+                        }
+                    }
+                }
+            });
+        }
+
+
         if (floatingActionButton != null)
             floatingActionButton.show();
 
@@ -172,8 +212,8 @@ public class TimetableFragment extends DrawerFragment implements
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.timetable, menu);
-        MenuItem transferWeekItem = menu.findItem(R.id.timetable_transfer_week);
-        transferWeekItem.setVisible(hasABWeek);
+        MenuItem copyWeekItem = menu.findItem(R.id.timetable_copy_week);
+        copyWeekItem.setVisible(hasABWeek);
     }
 
     @Override
@@ -181,6 +221,7 @@ public class TimetableFragment extends DrawerFragment implements
         switch (item.getItemId()) {
             case R.id.timetable_show_times:
                 showTimes = !showTimes;
+                settings.setTimetableShowTimes(showTimes);
                 if (pagerAdapter != null)
                     pagerAdapter.setShowTimes(showTimes);
                 break;
@@ -224,10 +265,10 @@ public class TimetableFragment extends DrawerFragment implements
                 });
                 builder.show();
                 return true;
-            case R.id.timetable_transfer_week:
+            case R.id.timetable_copy_week:
                 builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-                builder.setTitle(R.string.transfer_week);
-                builder.setMessage(R.string.all_subjects_of_the_target_week_will_be_overwritten_during_the_transfer);
+                builder.setTitle(R.string.copy_week);
+                builder.setMessage(R.string.all_subjects_of_the_target_week_will_be_overwritten);
                 View dialogView = LayoutInflater.from(getActivity()).inflate(
                         R.layout.dialog_timetable_transfer_week, null);
                 final TextView leftTextView = (TextView) dialogView.findViewById(
@@ -238,17 +279,17 @@ public class TimetableFragment extends DrawerFragment implements
                 rightTextView.setTag(1);
                 dialogView.findViewById(R.id.dialog_timetable_transfer_week_switch_image_button).
                         setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        CharSequence leftText = leftTextView.getText();
-                        leftTextView.setText(rightTextView.getText());
-                        rightTextView.setText(leftText);
+                            @Override
+                            public void onClick(View view) {
+                                CharSequence leftText = leftTextView.getText();
+                                leftTextView.setText(rightTextView.getText());
+                                rightTextView.setText(leftText);
 
-                        Object leftTag = leftTextView.getTag();
-                        leftTextView.setTag(rightTextView.getTag());
-                        rightTextView.setTag(leftTag);
-                    }
-                });
+                                Object leftTag = leftTextView.getTag();
+                                leftTextView.setTag(rightTextView.getTag());
+                                rightTextView.setTag(leftTag);
+                            }
+                        });
                 builder.setView(dialogView);
                 builder.setNegativeButton(android.R.string.cancel, null);
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

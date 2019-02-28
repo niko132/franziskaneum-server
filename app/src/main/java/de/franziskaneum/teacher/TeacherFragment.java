@@ -1,20 +1,33 @@
 package de.franziskaneum.teacher;
 
+import android.animation.Animator;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import de.franziskaneum.FranzCallback;
 import de.franziskaneum.R;
@@ -37,6 +50,8 @@ public class TeacherFragment extends DrawerFragment implements
     private RelativeLayout errorContainer;
     private ImageView errorImage;
     private TextView errorDescription;
+
+    private MaterialSearchView searchView;
 
     private FranzCallback teacherCallback = new FranzCallback() {
         @Override
@@ -104,6 +119,16 @@ public class TeacherFragment extends DrawerFragment implements
         Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
         setToolbar(toolbar);
 
+        searchView = (MaterialSearchView) root.findViewById(R.id.search_view);
+        searchView.findViewById(R.id.action_up_btn).setOnClickListener(this);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Drawable icon = getResources().getDrawable(R.drawable.ic_action_navigation_arrow_back, null);
+            icon.setColorFilter(ContextCompat.getColor(getContext(), R.color.ColorPrimary), PorterDuff.Mode.SRC_IN);
+
+            searchView.setBackIcon(icon);
+        }
+
         swipeRefreshLayout = (SwipeRefreshLayout) root
                 .findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -114,7 +139,7 @@ public class TeacherFragment extends DrawerFragment implements
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         if (recyclerAdapter == null)
-            recyclerAdapter = new TeacherRecyclerAdapter(this);
+            recyclerAdapter = new TeacherRecyclerAdapter();
 
         recyclerAdapter.setTeacherList(teacherList);
         recyclerView.setAdapter(recyclerAdapter);
@@ -131,6 +156,71 @@ public class TeacherFragment extends DrawerFragment implements
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        setHasOptionsMenu(false);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.teacher, menu);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            /*
+            final MenuItem menuItem = menu.findItem(R.id.action_search);
+            final SearchView searchView = (SearchView) menuItem.getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+
+                    if (recyclerAdapter != null)
+                        recyclerAdapter.getFilter().filter(query);
+
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    if (recyclerAdapter != null)
+                        recyclerAdapter.getFilter().filter(s);
+
+                    return true;
+                }
+            });
+            */
+
+            MenuItem searchItem = menu.findItem(R.id.action_search);
+            searchView.setMenuItem(searchItem);
+
+            searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+
+                    if (recyclerAdapter != null)
+                        recyclerAdapter.getFilter().filter(query);
+
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if (recyclerAdapter != null)
+                        recyclerAdapter.getFilter().filter(newText);
+
+                    return true;
+                }
+            });
+        }
+    }
+
+    @Override
     public void onRefresh() {
         teacherManager.getTeacherListAsync(true, teacherCallback);
     }
@@ -143,21 +233,69 @@ public class TeacherFragment extends DrawerFragment implements
                 errorContainer.setVisibility(View.GONE);
                 onRefresh();
                 break;
-            default:
-                Object itemPositionTag = view.getTag(R.string.recycler_item_position);
-
-                if (itemPositionTag != null) {
-                    int itemPosition = (int) itemPositionTag;
-                    if (itemPosition < teacherList.size()) {
-                        TeacherList.TeacherData teacher = teacherList.get(itemPosition);
-
-                        Intent teacherDetailIntent = new Intent(getActivity(),
-                                TeacherDetailActivity.class);
-                        teacherDetailIntent.putExtra(TeacherDetailActivity.EXTRA_TEACHER, teacher);
-                        startActivity(teacherDetailIntent);
-                    }
-                }
+            case R.id.action_up_btn:
+                closeSearch();
                 break;
+        }
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (searchView.isSearchOpen()) {
+            closeSearch();
+            return true;
+        }
+
+        return super.onBackPressed();
+    }
+
+    private void closeSearch() {
+        View view = searchView;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            int cx = view.getWidth() - (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 24, view.getResources().getDisplayMetrics());
+            int cy = view.getHeight() / 2;
+            int startRadius = Math.max(view.getWidth(), view.getHeight());
+
+            Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, startRadius, 0);
+            anim.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    searchView.closeSearch();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+                }
+            });
+
+            anim.start();
+        } else {
+            ViewCompat.animate(view).alpha(0.0f).setDuration(400).setListener(new ViewPropertyAnimatorListener() {
+                @Override
+                public void onAnimationStart(View view) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(View view) {
+                    searchView.closeSearch();
+                }
+
+                @Override
+                public void onAnimationCancel(View view) {
+
+                }
+            });
         }
     }
 

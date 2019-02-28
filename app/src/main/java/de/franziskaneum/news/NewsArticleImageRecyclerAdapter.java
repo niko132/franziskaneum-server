@@ -1,7 +1,10 @@
 package de.franziskaneum.news;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -13,16 +16,18 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.franziskaneum.R;
+import de.franziskaneum.utils.ClickableViewHolder;
 
 /**
  * Created by Niko on 27.02.2016.
  */
 public class NewsArticleImageRecyclerAdapter extends RecyclerView.Adapter<NewsArticleImageRecyclerAdapter.NewsArticleImageViewHolder> {
 
-    public static class NewsArticleImageViewHolder extends RecyclerView.ViewHolder {
+    public class NewsArticleImageViewHolder extends ClickableViewHolder {
 
         public ImageView image;
 
@@ -30,14 +35,24 @@ public class NewsArticleImageRecyclerAdapter extends RecyclerView.Adapter<NewsAr
             super(itemView);
             image = (ImageView) itemView.findViewById(R.id.news_article_image_list_item_image);
         }
+
+        @Override
+        public void onClick(int position, @Nullable Context context) {
+            Intent newsArticleImageGalleryIntent = new Intent(context, NewsArticleImageGalleryActivity.class);
+            newsArticleImageGalleryIntent.putParcelableArrayListExtra(
+                    NewsArticleImageGalleryActivity.EXTRA_NEWS_ARTICLE_IMAGES,
+                    (ArrayList<? extends Parcelable>) images);
+            newsArticleImageGalleryIntent.putExtra(
+                    NewsArticleImageGalleryActivity.EXTRA_START_IMAGE_INDEX, position);
+
+            context.startActivity(newsArticleImageGalleryIntent);
+        }
     }
 
-    private View.OnClickListener onClickListener;
     private List<News.NewsData.NewsArticleImage> images;
 
-    public NewsArticleImageRecyclerAdapter(@Nullable View.OnClickListener onClickListener) {
+    public NewsArticleImageRecyclerAdapter() {
         super();
-        this.onClickListener = onClickListener;
     }
 
     public void setImages(@NonNull List<News.NewsData.NewsArticleImage> images) {
@@ -77,11 +92,6 @@ public class NewsArticleImageRecyclerAdapter extends RecyclerView.Adapter<NewsAr
 
             holder.image.setTag(R.string.picasso_target, target);
             Picasso.with(holder.itemView.getContext()).load(image.getThumbnailUrl()).into(target);
-
-            if (onClickListener != null) {
-                holder.itemView.setTag(R.string.recycler_item_position, position);
-                holder.itemView.setOnClickListener(onClickListener);
-            }
         }
     }
 

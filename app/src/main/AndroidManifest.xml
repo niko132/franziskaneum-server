@@ -105,6 +105,11 @@
             android:launchMode="singleTop"
             android:parentActivityName=".settings.SettingsActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".settings.LicensesActivity"
+            android:label="@string/licenses"
+            android:launchMode="singleTop"
+            android:parentActivityName=".settings.AboutActivity" />
 
         <service android:name=".settings.AppUpdateService" />
         <service
@@ -126,18 +131,18 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/vplan_appwidget_info" />
         </receiver>
-        <service
-            android:name=".FranzFirebaseMessagingService">
+
+        <service android:name=".FranzFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".FranzFirebaseInstanceIDService">
+        <service android:name=".FranzFirebaseInstanceIDService">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification_app_update" />

@@ -13,6 +13,6 @@
         android:id="@+id/timetable_delete_all"
         android:title="@string/delete_all" />
     <item
-        android:id="@+id/timetable_transfer_week"
-        android:title="@string/transfer_week" />
+        android:id="@+id/timetable_copy_week"
+        android:title="@string/copy_week" />
 </menu>

@@ -1,14 +1,8 @@
 package de.franziskaneum.settings;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
-import de.franziskaneum.R;
-
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -16,6 +10,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import de.franziskaneum.R;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -38,6 +34,7 @@ public class AboutActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        /*
         Button changelogButton = (Button) findViewById(R.id.about_changelog);
         changelogButton.setOnClickListener(new OnClickListener() {
 
@@ -77,6 +74,16 @@ public class AboutActivity extends AppCompatActivity {
                 builder.show();
             }
 
+        });
+        */
+
+        Button licenses = (Button) findViewById(R.id.about_licenses);
+        licenses.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent licensesIntent = new Intent(AboutActivity.this, LicensesActivity.class);
+                startActivity(licensesIntent);
+            }
         });
     }
 

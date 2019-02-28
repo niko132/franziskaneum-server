@@ -3,11 +3,13 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
     android:orientation="horizontal"
     android:paddingEnd="8dp"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
-    android:paddingStart="8dp">
+    android:paddingStart="8dp"
+    android:focusable="true">
 
     <LinearLayout
         android:id="@+id/timetable_item_time_container"
@@ -49,7 +51,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
-        android:clickable="true"
         android:foreground="?selectableItemBackground"
         card_view:cardElevation="2dp"
         card_view:contentPaddingBottom="8dp"
@@ -68,7 +69,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:singleLine="true"
+                android:maxLines="1"
                 android:textColor="@color/DarkGray"
                 android:textSize="16sp" />
 
@@ -91,9 +92,9 @@
                     android:gravity="center_vertical|end"
                     android:marqueeRepeatLimit="marquee_forever"
                     android:maxWidth="96dp"
-                    android:singleLine="true"
                     android:textColor="@android:color/black"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:singleLine="true" />
 
                 <TextView
                     android:id="@+id/timetable_item_teacher_or_school_class"
@@ -105,9 +106,9 @@
                     android:gravity="center_vertical|end"
                     android:marqueeRepeatLimit="marquee_forever"
                     android:maxWidth="96dp"
-                    android:singleLine="true"
                     android:textColor="@color/DarkGray"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:singleLine="true" />
             </LinearLayout>
 
             <TextView
@@ -125,10 +126,10 @@
                 android:layout_toStartOf="@id/timetable_item_room_teacher_or_school_class_container"
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
-                android:singleLine="true"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:singleLine="true" />
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>

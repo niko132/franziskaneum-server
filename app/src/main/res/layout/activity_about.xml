@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -18,14 +18,14 @@
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="false"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingTop="?attr/actionBarSize"
-        android:clickable="false">
+        android:paddingTop="?attr/actionBarSize">
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,7 +33,7 @@
                 android:layout_gravity="center"
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:padding="16dp" >
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -55,24 +55,36 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:textSize="18sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:text="@string/developed_by_niko_kirste"
-                    android:textSize="18sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <!--
 
                 <Button
                     android:id="@+id/about_changelog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
+                    android:background="?selectableItemBackgroundBorderless"
                     android:text="@string/changelog"
                     android:textColor="@color/ColorAccent" />
+
+                -->
+
+                <Button
+                    android:id="@+id/about_licenses"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:text="@string/licenses"
+                    android:textColor="@color/ColorAccent"/>
             </LinearLayout>
         </FrameLayout>
     </android.support.v4.widget.NestedScrollView>

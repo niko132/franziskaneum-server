@@ -1,5 +1,7 @@
 package de.franziskaneum.drawer;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 
@@ -21,5 +23,20 @@ public class DrawerActivity extends AppCompatActivity {
         this.listener = listener;
         if (listener != null && drawerLayout != null)
             listener.onDrawerInflated(drawerLayout);
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+        for (Fragment fragment : fm.getFragments()) {
+            if (fragment instanceof DrawerFragment) {
+                DrawerFragment df = (DrawerFragment) fragment;
+
+                if (df.onBackPressed())
+                    return;
+            }
+        }
+
+        super.onBackPressed();
     }
 }

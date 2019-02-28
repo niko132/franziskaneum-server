@@ -24,9 +24,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import de.franziskaneum.FranzCallback;
-import de.franziskaneum.Network;
 import de.franziskaneum.ReturnValue;
 import de.franziskaneum.Status;
+import de.franziskaneum.utils.Network;
 
 /**
  * Created by Niko on 13.08.2016.
@@ -35,8 +35,12 @@ public class TeacherManager {
     public static final String CACHED_TEACHER_LIST_FILENAME = "teacher.xml";
     private static final String TEACHER_LIST_FILENAME = "teacher.json";
 
+    /*
     private static final String TEACHER_LIST_URL =
-            "http://www.franziskaneum.de/wordpress/wer-wir-sind/lehrerliste/";
+            "https://www.franziskaneum.de/wordpress/wer-wir-sind/lehrerliste/";
+    */
+    private static final String TEACHER_LIST_URL =
+            "https://www.franziskaneum.de/wordpress/wer-wir-sind/lehrer-im-schuljahr-201718/";
 
     private static TeacherManager instance;
 
@@ -111,7 +115,7 @@ public class TeacherManager {
                 cachedTeacherListFile =
                         new File(context.getFilesDir(), CACHED_TEACHER_LIST_FILENAME);
                 FileInputStream fis = null;
-                ReturnValue rv = null;
+                ReturnValue rv;
                 try {
                     fis = new FileInputStream(cachedTeacherListFile);
 
@@ -139,7 +143,7 @@ public class TeacherManager {
     private ReturnValue downloadTeacherList() {
         if (Network.isConnected(context)) {
             HttpURLConnection teacherListURLConnection = null;
-            ReturnValue rv = null;
+            ReturnValue rv;
             try {
                 teacherListURLConnection =
                         (HttpURLConnection) new URL(TEACHER_LIST_URL).openConnection();
@@ -229,14 +233,14 @@ public class TeacherManager {
                     if (teacherElements.size() >= 2) {
                         TeacherList.TeacherData teacherData;
 
-                        for (int i = 1; i < teacherElements.size(); i++) {
+                        for (int i = 1; i < teacherElements.size(); i++) { // begin at index 1 to ignore the table header
                             Element teacherElement = teacherElements.get(i);
-                            teacherData = new TeacherList.TeacherData();
-                            teacherList.add(teacherData);
-
                             Elements tdElements = teacherElement.getElementsByTag("td");
 
                             if (tdElements.size() >= 1) {
+                                teacherData = new TeacherList.TeacherData();
+                                teacherList.add(teacherData);
+
                                 teacherData.setShortcut(tdElements.get(0).text().trim());
 
                                 if (tdElements.size() >= 2) {

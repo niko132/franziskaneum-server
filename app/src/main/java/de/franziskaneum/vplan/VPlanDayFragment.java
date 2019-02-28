@@ -83,8 +83,9 @@ public class VPlanDayFragment extends Fragment {
 
     private void toggleNoChangesView() {
         if (recycler != null && noChanges != null)
-            if ((vplanDay == null || vplanDay.getTableData() == null ||
-                    vplanDay.getTableData().size() == 0) && noChangesAvailable) {
+            if ((vplanDay == null || ((vplanDay.getTableData() == null ||
+                    vplanDay.getTableData().isEmpty()) && (vplanDay.getExamData() == null ||
+                    vplanDay.getExamData().isEmpty()))) && noChangesAvailable) {
                 recycler.setVisibility(View.GONE);
                 noChanges.setVisibility(View.VISIBLE);
             } else {

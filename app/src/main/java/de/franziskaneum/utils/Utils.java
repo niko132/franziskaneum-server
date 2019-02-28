@@ -1,4 +1,4 @@
-package de.franziskaneum;
+package de.franziskaneum.utils;
 
 import android.content.Context;
 import android.content.res.Resources;

@@ -1,28 +1,20 @@
 package de.franziskaneum.news;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import de.franziskaneum.FranzCallback;
 import de.franziskaneum.R;
@@ -33,7 +25,7 @@ import de.franziskaneum.views.SwipeRefreshLayout;
 /**
  * Created by Niko on 26.02.2016.
  */
-public class NewsFragment extends DrawerFragment implements android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
+public class NewsFragment extends DrawerFragment implements android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener, View.OnClickListener, NewsRecyclerAdapter.OlderPostsCallback {
 
     private NewsManager newsManager;
     @Nullable
@@ -52,9 +44,6 @@ public class NewsFragment extends DrawerFragment implements android.support.v4.w
         public void onCallback(int status, Object... objects) {
             if (errorContainer != null)
                 errorContainer.setVisibility(View.GONE);
-
-            if (recyclerAdapter != null)
-                recyclerAdapter.cancelLoadingOlderPosts();
 
             if (Status.OK == status && objects.length > 0 && objects[0] != null) {
                 News news = (News) objects[0];
@@ -76,7 +65,7 @@ public class NewsFragment extends DrawerFragment implements android.support.v4.w
                         if (NewsFragment.this.news == null) {
                             if (errorDescription != null)
                                 errorDescription.setText(R.string.no_connection);
-                            if (errorImage != null)
+                            if (errorImage != null && getContext() != null)
                                 errorImage.setImageDrawable(ContextCompat.getDrawable(
                                         getContext(), R.drawable.ic_no_connection));
 
@@ -102,7 +91,7 @@ public class NewsFragment extends DrawerFragment implements android.support.v4.w
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        newsManager = NewsManager.getInstance();
+        newsManager = NewsManager.getInstance(getActivity());
 
         if (news == null) {
             shouldRefresh = true;
@@ -129,7 +118,7 @@ public class NewsFragment extends DrawerFragment implements android.support.v4.w
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         if (recyclerAdapter == null)
-            recyclerAdapter = new NewsRecyclerAdapter(this);
+            recyclerAdapter = new NewsRecyclerAdapter(this, getActivity());
         recyclerAdapter.setNews(news);
 
         recyclerView.setAdapter(recyclerAdapter);
@@ -143,6 +132,30 @@ public class NewsFragment extends DrawerFragment implements android.support.v4.w
         errorContainer.setOnClickListener(this);
 
         return root;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (recyclerAdapter != null && context instanceof Activity)
+            recyclerAdapter.setActivity((Activity) context);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (recyclerAdapter != null)
+            recyclerAdapter.freeMemory();
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDetach() {
+        if (recyclerAdapter != null)
+            recyclerAdapter.freeMemory();
+
+        super.onDetach();
     }
 
     @Override
@@ -162,54 +175,13 @@ public class NewsFragment extends DrawerFragment implements android.support.v4.w
                     errorContainer.setVisibility(View.GONE);
                 onRefresh();
                 break;
-            default:
-                Object itemPositionTag = view.getTag(R.string.recycler_item_position);
-
-                if (itemPositionTag != null && news != null) {
-                    int itemPosition = (int) itemPositionTag;
-
-                    if (itemPosition == news.size()) {  // older posts button was pressed
-                        newsManager.getNewsAsync(NewsManager.NEWS_OLDER_POSTS_URL, false,
-                                newsCallback);
-                    } else if (itemPosition >= 0 && itemPosition < news.size()) {
-                        News.NewsData newsArticle = news.get(itemPosition);
-
-                        Intent newsArticleIntent = new Intent(getActivity(), NewsArticleActivity.class);
-                        newsArticleIntent.putExtra(NewsArticleActivity.EXTRA_NEWS_ARTICLE, newsArticle);
-
-                        if (newsArticle.hasBaseImage() &&
-                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            View startImage = view.findViewById(R.id.news_list_item_image);
-                            if (startImage != null) {
-                                View statusBar = getActivity().findViewById(
-                                        android.R.id.statusBarBackground);
-                                View navigationBar = getActivity().findViewById(
-                                        android.R.id.navigationBarBackground);
-
-                                List<Pair<View, String>> pairs = new ArrayList<>();
-                                if (statusBar != null)
-                                    pairs.add(Pair.create(statusBar,
-                                            Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME));
-                                if (navigationBar != null)
-                                    pairs.add(Pair.create(navigationBar,
-                                            Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME));
-
-                                pairs.add(Pair.create(startImage, startImage.getTransitionName()));
-
-                                ActivityOptionsCompat activityOptions =
-                                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                                getActivity(),
-                                                pairs.toArray(new Pair[pairs.size()]));
-                                ActivityCompat.startActivity(getActivity(), newsArticleIntent,
-                                        activityOptions.toBundle());
-                            } else
-                                startActivity(newsArticleIntent);
-                        } else
-                            startActivity(newsArticleIntent);
-                    }
-                }
-                break;
         }
+    }
+
+    @Override
+    public void loadOlderPosts() {
+        newsManager.getNewsAsync(NewsManager.NEWS_OLDER_POSTS_URL, false,
+                newsCallback);
     }
 
     @Override

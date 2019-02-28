@@ -1,68 +1,88 @@
 package de.franziskaneum.settings;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
+import android.os.Binder;
+import android.os.Environment;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+
+import com.dropbox.core.DbxDownloader;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.AppKeyPair;
-
-import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.BitmapFactory;
-import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
-
 import de.franziskaneum.Constants;
-import de.franziskaneum.Network;
 import de.franziskaneum.R;
+import de.franziskaneum.utils.ProgressOutputStream;
 
-public class AppUpdateService extends IntentService {
+/**
+ * Created by Niko on 19.01.2017.
+ */
 
-    private static final String APP_KEY = "wz8193x713voom0";
-    private static final String APP_SECRET = "0whfktq16rm73xw";
-    private static final String OAUTH2_ACCESS_TOKEN =
-            "_Rjs2Zx1EoAAAAAAAAAALEghRdatD7IeSqHFAteiBCuZnK0qgAAipEkt1z_LeKkl";
-    public static final String KEY_IGNORE_UPDATE = "ignore_update";
-    private static final String EXTRA_IGNORE_UPDATE =
-            "de.franziskaneum.settings.AppUpdateService.extra.IGNORE_UPDATE";
+public class AppUpdateService extends Service {
+    private static final String ACCESS_TOKEN = "_Rjs2Zx1EoAAAAAAAAAATEWpFaqBJHjarkVDb8S1sEijFQXolZXD-tVfJa1s_lKF";
+    private static final String EXTRA_IGNORE_APP_UPDATE_VERSION =
+            "de.franziskaneum.settings.AppUpdateService.extra.IGNORE_APP_UPDATE_VERSION";
+    public static final String KEY_CHECKED_FOR_UPDATE = "checked_for_update";
 
-    private SharedPreferences prefs;
-
-    public AppUpdateService() {
-        super(AppUpdateService.class.getName());
-    }
+    private IBinder binder = new AppUpdateBinder();
+    private DbxClientV2 client;
+    private SettingsManager settings;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        DbxRequestConfig config = new DbxRequestConfig("franziskaneum/app");
+        client = new DbxClientV2(config, ACCESS_TOKEN);
+        settings = SettingsManager.getInstance();
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        if (!Network.isConnected(this))
-            return;
+    public int onStartCommand(Intent intent, int flags, final int startId) {
+        if (intent.getExtras() != null && intent.getExtras().containsKey(EXTRA_IGNORE_APP_UPDATE_VERSION)) {
+            int version = intent.getIntExtra(EXTRA_IGNORE_APP_UPDATE_VERSION, 0);
+            settings.setIgnoredAppUpdateVersion(version);
+            stopSelf(startId);
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int appUpdateVersion = getAppUpdateVersion();
+                    if (isAppUpdateNew(appUpdateVersion) && appUpdateVersion >
+                            settings.getIgnoredAppUpdateVersion()) {
+                        makeNotification(appUpdateVersion);
+                    }
 
+                    stopSelf(startId);
+                }
+            }).start();
+        }
+
+        return Service.START_NOT_STICKY;
+    }
+
+    int getAppUpdateVersion() {
+        int version = 0;
+        InputStream is = null;
         try {
-            AndroidAuthSession session = new AndroidAuthSession(new AppKeyPair(
-                    APP_KEY, APP_SECRET));
-            session.setOAuth2AccessToken(OAUTH2_ACCESS_TOKEN);
-
-            DropboxAPI<AndroidAuthSession> DBApi = new DropboxAPI<>(session);
-
-            InputStream is = DBApi.getFileStream("/app/version", null);
-
+            is = client.files().download("/app/version").getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             String line;
@@ -72,27 +92,71 @@ public class AppUpdateService extends IntentService {
                 versionString += line;
             }
 
-            is.close();
-
-            int versionCode = Integer.parseInt(versionString);
-
-            if (intent.getBooleanExtra(EXTRA_IGNORE_UPDATE, false)) {
-                Editor editor = prefs.edit();
-                editor.putInt(KEY_IGNORE_UPDATE, versionCode);
-                editor.apply();
-            } else {
-                if (versionCode > this.getPackageManager().getPackageInfo(
-                        getPackageName(), 0).versionCode
-                        && versionCode > prefs.getInt(KEY_IGNORE_UPDATE, 0)) {
-                    makeNotification();
-                }
-            }
-        } catch (NameNotFoundException | IOException | DropboxException e) {
+            version = Integer.parseInt(versionString);
+        } catch (DbxException | IOException e) {
             e.printStackTrace();
+        } finally {
+            if (is != null)
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+
+        return version;
+    }
+
+    boolean isAppUpdateNew(int appUpdateVersion) {
+        try {
+            return appUpdateVersion >
+                    getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
-    private void makeNotification() {
+    String downloadAppUpdate(@Nullable ProgressOutputStream.Listener listener) {
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            return null;
+        } else {
+            File file = new File(Environment.getExternalStorageDirectory()
+                    .getAbsolutePath() + "/Franziskaneum/app");
+            if (file.exists() || file.mkdirs()) {
+                file = new File(file, "/Franziskaneum.apk");
+                FileOutputStream fos = null;
+                String filePath = null;
+                try {
+                    fos = new FileOutputStream(file);
+
+                    DbxDownloader<FileMetadata> dl = client.files().download("/app/Franziskaneum.apk");
+                    long size = dl.getResult().getSize();
+
+                    dl.download(new ProgressOutputStream(size, fos, listener));
+
+                    filePath = file.getAbsolutePath();
+                } catch (DbxException | IOException e) {
+                    e.printStackTrace();
+                    filePath = null;
+                } finally {
+                    if (fos != null)
+                        try {
+                            fos.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                }
+
+                return filePath;
+            }
+
+        }
+
+        return null;
+    }
+
+    private void makeNotification(int appUpdateVersion) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 this);
         builder.setContentTitle(this.getString(R.string.app_update));
@@ -109,14 +173,14 @@ public class AppUpdateService extends IntentService {
         builder.setVibrate(pattern);
 
         Intent contentIntent = new Intent(this, AppUpdateActivity.class);
-        contentIntent.putExtra(AppUpdateActivity.KEY_CHECKED_FOR_UPDATE, true);
+        contentIntent.putExtra(KEY_CHECKED_FOR_UPDATE, true);
         PendingIntent contentPendingIntent = PendingIntent.getActivity(this,
                 Constants.PENDING_INTENT_NOTIFICATION_APP_UPDATE_CONTENT,
                 contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentPendingIntent);
 
         Intent deleteIntent = new Intent(this, AppUpdateService.class);
-        deleteIntent.putExtra(EXTRA_IGNORE_UPDATE, true);
+        deleteIntent.putExtra(EXTRA_IGNORE_APP_UPDATE_VERSION, appUpdateVersion);
         PendingIntent deletePendingIntent = PendingIntent.getService(this,
                 Constants.PENDING_INTENT_NOTIFICATION_APP_UPDATE_DELETE,
                 deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -125,5 +189,18 @@ public class AppUpdateService extends IntentService {
         NotificationManager nm = (NotificationManager) this
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(Constants.NOTIFICATION_ID_APP_UPDATE, builder.build());
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    public class AppUpdateBinder extends Binder {
+        AppUpdateService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return AppUpdateService.this;
+        }
     }
 }

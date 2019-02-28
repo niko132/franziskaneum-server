@@ -27,12 +27,28 @@ import de.franziskaneum.settings.SettingsManager;
 /**
  * Created by Niko on 20.12.2015.
  */
-public class VPlan extends ArrayList<VPlan.VPlanDayData> {
+public class VPlan extends ArrayList<VPlan.VPlanDayData> implements Parcelable { // implement Parcelable to prevent Exception when casting to Parcelable
     public static final String EXTRA_VPLAN = "de.franziskaneum.vplan.extra.VPLAN";
 
     public VPlan() {
         super();
     }
+
+    private VPlan(Parcel in) {
+        super(in.createTypedArrayList(VPlanDayData.CREATOR));
+    }
+
+    public static final Creator<VPlan> CREATOR = new Creator<VPlan>() {
+        @Override
+        public VPlan createFromParcel(Parcel in) {
+            return new VPlan(in);
+        }
+
+        @Override
+        public VPlan[] newArray(int size) {
+            return new VPlan[size];
+        }
+    };
 
     @Nullable
     static VPlan readFromFile(File file) {
@@ -94,32 +110,15 @@ public class VPlan extends ArrayList<VPlan.VPlanDayData> {
         return clone;
     }
 
-    boolean notificationEquals(@Nullable VPlan rhs) {
-        if (rhs == null || rhs.size() != size())
-            return false;
-
-        for (int i = 0; i < size(); i++) {
-            VPlanDayData lhsDay = get(i);
-            VPlanDayData rhsDay = rhs.get(i);
-
-            if ((lhsDay.title != null && rhsDay.title != null &&
-                    !lhsDay.title.equals(rhsDay.title)) || lhsDay.getTableData() == null ||
-                    rhsDay.getTableData() == null || lhsDay.getTableData().size() !=
-                    rhsDay.getTableData().size())
-                return false;
-
-            for (int j = 0; j < lhsDay.getTableData().size(); j++) {
-                VPlanDayData.VPlanTableData lhsTableRow = lhsDay.getTableData().get(j);
-                VPlanDayData.VPlanTableData rhsTableRow = rhsDay.getTableData().get(j);
-
-                if (!lhsTableRow.equals(rhsTableRow))
-                    return false;
-            }
-        }
-
-        return true;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeTypedList(this);
+    }
 
 
     public static class VPlanDayData implements Parcelable {
@@ -329,7 +328,7 @@ public class VPlan extends ArrayList<VPlan.VPlanDayData> {
         }
 
         @Nullable
-        Calendar getCalendarDate() {
+        public Calendar getCalendarDate() {
             SimpleDateFormat sdf = new SimpleDateFormat("cccc, d. MMMM yyyy",
                     Locale.GERMANY);
             Calendar date = Calendar.getInstance();
@@ -349,6 +348,13 @@ public class VPlan extends ArrayList<VPlan.VPlanDayData> {
                 return title.substring(0, title.indexOf(","));
             } else
                 return null;
+        }
+
+        public int getCurrentWeek() {
+            if (title != null && title.toLowerCase().contains("b-woche"))
+                return 1;
+
+            return 0;
         }
 
         @Override
@@ -399,6 +405,11 @@ public class VPlan extends ArrayList<VPlan.VPlanDayData> {
             if (tableData != null)
                 for (VPlanTableData vplanTableRow : tableData) {
                     clone.addTableData(vplanTableRow.clone());
+                }
+
+            if (examData != null)
+                for (VPlanExamData vPlanExamData : examData) {
+                    clone.addExamData(vPlanExamData.clone());
                 }
 
             return clone;
@@ -544,14 +555,13 @@ public class VPlan extends ArrayList<VPlan.VPlanDayData> {
                 if (o instanceof VPlanTableData) {
                     VPlanTableData rhs = (VPlanTableData) o;
 
-                    if ((rhs.schoolClass != null && schoolClass != null &&
+                    return (rhs.schoolClass != null && schoolClass != null &&
                             rhs.schoolClass.equals(schoolClass)) && (rhs.hour != null &&
                             hour != null && rhs.hour.equals(hour)) && (rhs.subject != null &&
                             subject != null && rhs.subject.equals(subject)) &&
                             (rhs.teacher != null && teacher != null && rhs.teacher.equals(teacher)) &&
                             (rhs.room != null && room != null && rhs.room.equals(room)) &&
-                            (rhs.info != null && info != null && rhs.info.equals(info)))
-                        return true;
+                            (rhs.info != null && info != null && rhs.info.equals(info));
                 }
 
                 return false;

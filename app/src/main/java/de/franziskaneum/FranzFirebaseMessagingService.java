@@ -1,6 +1,7 @@
 package de.franziskaneum;
 
 import android.content.Intent;
+import android.os.Parcelable;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -25,10 +26,10 @@ public class FranzFirebaseMessagingService extends FirebaseMessagingService {
 
         String from = remoteMessage.getFrom();
 
-        if (from.equalsIgnoreCase("/topics/vplan")) {
+        if (from != null && from.equalsIgnoreCase("/topics/vplan")) {
             Map<String, String> data = remoteMessage.getData();
             String key = "new_vplan_available";
-            if (data.containsKey(key) && data.get(key).equalsIgnoreCase("true")) {
+            if (data.containsKey(key) && "true".equalsIgnoreCase(data.get(key))) {
                 VPlanManager.getInstance().getVPlanAsync(VPlanManager.Mode.IF_MODIFIED, new FranzCallback() {
                     @Override
                     public void onCallback(int status, Object... objects) {
@@ -36,7 +37,7 @@ public class FranzFirebaseMessagingService extends FirebaseMessagingService {
                             VPlan vplan = (VPlan) objects[1];
 
                             Intent broadcastIntent = new Intent(ACTION_NEW_VPLAN_AVAILABLE);
-                            broadcastIntent.putExtra(VPlan.EXTRA_VPLAN, vplan);
+                            broadcastIntent.putExtra(VPlan.EXTRA_VPLAN, (Parcelable) vplan);
                             sendBroadcast(broadcastIntent);
 
                             VPlanNotificationManager.getInstance().makeNotificationAsync(vplan);

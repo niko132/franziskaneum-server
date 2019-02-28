@@ -2,28 +2,28 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:transitionGroup="true">
+    android:layout_height="match_parent">
 
     <com.github.ksoichiro.android.observablescrollview.ObservableScrollView
         android:id="@+id/news_article_observable_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false">
+        android:clipToPadding="false"
+        android:transitionGroup="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <FrameLayout
                 android:id="@+id/news_article_anchor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <de.hdodenhof.circleimageview.CircleImageView
+                <de.franziskaneum.CircleImageView
                     android:id="@+id/news_article_image"
-                    android:layout_width="112dp"
-                    android:layout_height="112dp"
+                    android:layout_width="224dp"
+                    android:layout_height="224dp"
                     android:layout_gravity="center"
                     android:scaleType="centerCrop"
                     android:transitionName="@string/transition_news_image" />
@@ -31,9 +31,9 @@
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/test"
+                android:id="@+id/news_article_content_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_below="@id/news_article_anchor"
                 android:padding="16dp">
 
@@ -96,6 +96,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/transparent"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:transitionName="@string/transition_toolbar" />
 
 </android.support.design.widget.CoordinatorLayout>

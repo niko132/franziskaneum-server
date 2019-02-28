@@ -1,6 +1,7 @@
 package de.franziskaneum.vplan;
 
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -8,14 +9,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import de.franziskaneum.FranzCallback;
-import de.franziskaneum.Status;
 import de.franziskaneum.R;
+import de.franziskaneum.Status;
 
 /**
  * Created by Niko on 23.02.2016.
  */
 public class VPlanDayActivity extends AppCompatActivity {
-
     public static final String EXTRA_VPLAN_DAY_DATA =
             "de.franziskaneum.vplan.VPlanDayActivity.extra.VPLAN_DAY";
     public static final String EXTRA_DAY_TITLE =
@@ -36,6 +36,23 @@ public class VPlanDayActivity extends AppCompatActivity {
         pagerAdapter = new VPlanDayPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
 
+        final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                appBarLayout.setExpanded(true, false); // expand the toolbar to be able to click the back button without scrolling
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
+
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -44,7 +61,6 @@ public class VPlanDayActivity extends AppCompatActivity {
             final VPlan.VPlanDayData dayData = extras.getParcelable(EXTRA_VPLAN_DAY_DATA);
             if (dayData != null) {
                 pagerAdapter.setGeneralVPlanDay(dayData);
-
 
                 VPlan notificationVPlan = new VPlan();
                 notificationVPlan.add(dayData);
@@ -77,11 +93,10 @@ public class VPlanDayActivity extends AppCompatActivity {
                                             dayData.getTitle().equals(dayTitle)) {
                                         pagerAdapter.setGeneralVPlanDay(dayData);
 
-
                                         VPlanNotificationManager.getInstance().getFilteredVPlanAsync(vplan, new FranzCallback() {
                                             @Override
                                             public void onCallback(int status, Object... objects) {
-                                                if (Status.OK == status && objects.length > 1 && objects[0] != null) {
+                                                if (Status.OK == status && objects.length > 0 && objects[0] != null) {
                                                     VPlan filteredVPlan = (VPlan) objects[0];
 
                                                     for (VPlan.VPlanDayData filteredDay : filteredVPlan)

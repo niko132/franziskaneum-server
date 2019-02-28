@@ -4,7 +4,6 @@ import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,12 +34,12 @@ class VPlanDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private static class VPlanDayHeaderViewHolder extends RecyclerView.ViewHolder {
         TextView property;
-        TextView value;
+        TeacherLinkTextView value;
 
         VPlanDayHeaderViewHolder(View itemView) {
             super(itemView);
             property = (TextView) itemView.findViewById(R.id.vplan_day_list_item_property);
-            value = (TextView) itemView.findViewById(R.id.vplan_day_list_item_value);
+            value = (TeacherLinkTextView) itemView.findViewById(R.id.vplan_day_list_item_value);
         }
     }
 
@@ -268,6 +267,10 @@ class VPlanDayRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         viewHolder.property.setText(R.string.additional_info);
                         viewHolder.value.setText(vplanDay.getAdditionalInfo());
                         break;
+                }
+
+                if (teacherList != null) {
+                    viewHolder.value.setTeacherList(teacherList);
                 }
             } else {
                 int vplanTableSize = 0;

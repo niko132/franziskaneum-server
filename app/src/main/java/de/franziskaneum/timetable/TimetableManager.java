@@ -70,16 +70,18 @@ public class TimetableManager {
         }).start();
     }
 
-    public void saveTimetableAsync(@NonNull final Timetable timetable) {
-        TimetableManager.this.timetable = timetable;
+    public void saveTimetableAsync(final Timetable timetable) {
+        if (timetable != null) {
+            TimetableManager.this.timetable = timetable;
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                File cachedTimetableFile = new File(context.getFilesDir(), TIMETABLE_FILENAME);
-                Timetable.writeToFile(timetable, cachedTimetableFile);
-            }
-        }).start();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    File cachedTimetableFile = new File(context.getFilesDir(), TIMETABLE_FILENAME);
+                    Timetable.writeToFile(timetable, cachedTimetableFile);
+                }
+            }).start();
+        }
     }
 
     public ReturnValue getTimetable() {

@@ -17,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.DefaultSliderView;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Calendar;
@@ -220,6 +222,18 @@ public class MainActivity extends DrawerActivity {
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         FirebaseMessaging.getInstance().subscribeToTopic("vplan");
+
+        Log.d("main", "Token: " + FirebaseInstanceId.getInstance().getToken());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        selectedDrawerItemID = intent.getIntExtra(EXTRA_DRAWER_ITEM_ID, selectedDrawerItemID);
+
+        navigationView.setCheckedItem(selectedDrawerItemID);
+        navigationView.getMenu().performIdentifierAction(selectedDrawerItemID, 0);
     }
 
     private void welcomeDialog() {
@@ -375,7 +389,7 @@ public class MainActivity extends DrawerActivity {
         if (!settings.isTeacher()) {
             Calendar schoolClassLastModifiedExpiringDate = Calendar.getInstance();
             schoolClassLastModifiedExpiringDate.setTimeInMillis(settings.getSchoolClassLastModified());
-            schoolClassLastModifiedExpiringDate.add(Calendar.WEEK_OF_YEAR, 6); // add 6 (vacation length)
+            schoolClassLastModifiedExpiringDate.add(Calendar.WEEK_OF_YEAR, 6); // add 6 (holiday length)
 
             Calendar schoolClassUpdateDate = Calendar.getInstance();
             schoolClassUpdateDate.setTimeInMillis(schoolClassLastModifiedExpiringDate.getTimeInMillis());
@@ -447,5 +461,4 @@ public class MainActivity extends DrawerActivity {
         else
             super.onBackPressed();
     }
-
 }

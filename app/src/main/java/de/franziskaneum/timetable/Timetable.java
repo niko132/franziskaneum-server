@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -133,6 +134,32 @@ public class Timetable extends ArrayList<List<List<Timetable.TimetableData>>> {
         return false;
     }
 
+    public int numberOfLessons(boolean countFreehours) {
+        int[] lessonsInWeek = new int[this.size()];
+
+        for (int i = 0; i < this.size(); i++) {
+            List<List<TimetableData>> week = this.get(i);
+            int lessons = 0;
+
+            for (int j = 0; j < week.size(); j++) {
+                List<TimetableData> day = week.get(j);
+
+                for (int k = 0; k < day.size(); k++) {
+                    TimetableData lesson = day.get(k);
+
+                    if (countFreehours || !lesson.isFreehour())
+                        lessons += lesson.isDoubleHour ? 2 : 1;
+                }
+            }
+
+            lessonsInWeek[i] = lessons;
+        }
+
+        Arrays.sort(lessonsInWeek);
+
+        return lessonsInWeek[lessonsInWeek.length - 1];
+    }
+
     public static class TimetableData implements Parcelable {
 
         private int hour;
@@ -244,6 +271,9 @@ public class Timetable extends ArrayList<List<List<Timetable.TimetableData>>> {
             return clone;
         }
 
+        public boolean isFreehour() {
+            return subject == null || subject.isEmpty();
+        }
     }
 
 }

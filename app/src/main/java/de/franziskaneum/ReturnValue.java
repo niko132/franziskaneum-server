@@ -8,6 +8,11 @@ public class ReturnValue {
     public int status;
     public Object[] objects;
 
+    public ReturnValue(int status) {
+        this.status = status;
+        this.objects = null;
+    }
+
     public ReturnValue(int status, Object... objects) {
         this.status = status;
         this.objects = objects;

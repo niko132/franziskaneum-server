@@ -100,4 +100,8 @@ public abstract class DrawerFragment extends Fragment implements OnDrawerInflate
 
     public abstract String getTitle(Context context);
 
+    public boolean onBackPressed() {
+        return false;
+    }
+
 }

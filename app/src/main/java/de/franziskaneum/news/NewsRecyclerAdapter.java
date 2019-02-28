@@ -1,23 +1,32 @@
 package de.franziskaneum.news;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.franziskaneum.CircleImageView;
 import de.franziskaneum.R;
-import de.hdodenhof.circleimageview.CircleImageView;
-import uk.co.deanwild.flowtextview.FlowTextView;
+import de.franziskaneum.utils.ClickableViewHolder;
 
 /**
  * Created by Niko on 26.02.2016.
@@ -28,11 +37,16 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final int VIEW_TYPE_ARTICLE_IMAGE = 1;
     private static final int VIEW_TYPE_OLDER_POSTS = 2;
 
-    private View.OnClickListener onClickListener;
     private News news;
-    private boolean isLoading = false;
+    @Nullable
+    private Activity activity; // needed for shared element transition
+    private OlderPostsCallback olderPostsCallback;
 
-    public static class NewsArticleViewHolder extends RecyclerView.ViewHolder {
+    public interface OlderPostsCallback {
+        void loadOlderPosts();
+    }
+
+    public class NewsArticleViewHolder extends ClickableViewHolder {
 
         public TextView title;
         public TextView content;
@@ -43,47 +57,97 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             title = (TextView) itemView.findViewById(R.id.news_list_item_title);
             content = (TextView) itemView.findViewById(R.id.news_list_item_content);
         }
+
+        @Override
+        public void onClick(int position, @Nullable Context context) {
+
+            News.NewsData newsArticle = news.get(position);
+
+            Intent newsArticleIntent = new Intent(context, NewsArticleActivity.class);
+            newsArticleIntent.putExtra(NewsArticleActivity.EXTRA_NEWS_ARTICLE, newsArticle);
+
+            context.startActivity(newsArticleIntent);
+        }
     }
 
-    public static class NewsArticleImageViewHolder extends RecyclerView.ViewHolder {
+    public class NewsArticleImageViewHolder extends ClickableViewHolder {
 
         public TextView title;
-        public FlowTextView content;
+        public de.franziskaneum.views.FlowTextView content;
         public CircleImageView image;
 
         public NewsArticleImageViewHolder(View itemView) {
             super(itemView);
 
             title = (TextView) itemView.findViewById(R.id.news_list_item_title);
-            content = (FlowTextView) itemView.findViewById(R.id.news_list_item_content);
-            content.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.DarkGray));
+            content = (de.franziskaneum.views.FlowTextView) itemView.findViewById(R.id.news_list_item_content);
             image = (CircleImageView) itemView.findViewById(R.id.news_list_item_image);
+            image.setCircularPercentage(1f);
+        }
+
+        @Override
+        public void onClick(int position, @Nullable Context context) {
+            if (context != null && news != null && news.size() > position) {
+                News.NewsData newsArticle = news.get(position);
+
+                Intent newsArticleIntent = new Intent(context, NewsArticleActivity.class);
+                newsArticleIntent.putExtra(NewsArticleActivity.EXTRA_NEWS_ARTICLE, newsArticle);
+
+                if (newsArticle.hasBaseImage() &&
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (activity != null) {
+                        View startImage = image;
+                        if (startImage != null) {
+                            View decorView = activity.getWindow().getDecorView();
+
+                            View statusBar = decorView.findViewById(
+                                    android.R.id.statusBarBackground);
+                            View navigationBar = decorView.findViewById(
+                                    android.R.id.navigationBarBackground);
+
+                            List<Pair<View, String>> pairs = new ArrayList<>();
+
+                            pairs.add(Pair.create(startImage, startImage.getTransitionName()));
+
+                            if (statusBar != null)
+                                pairs.add(Pair.create(statusBar,
+                                        Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME));
+                            if (navigationBar != null)
+                                pairs.add(Pair.create(navigationBar,
+                                        Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME));
+
+
+                            ActivityOptionsCompat activityOptions =
+                                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                            activity,
+                                            pairs.toArray(new Pair[pairs.size()]));
+                            ActivityCompat.startActivity(context, newsArticleIntent,
+                                    activityOptions.toBundle());
+                        } else
+                            context.startActivity(newsArticleIntent);
+                    } else
+                        context.startActivity(newsArticleIntent);
+                } else
+                    context.startActivity(newsArticleIntent);
+            }
         }
     }
 
     public static class NewsOlderPostsViewHolder extends RecyclerView.ViewHolder {
 
-        public Button loadOlderPosts;
         public ProgressBar olderPostsProgress;
 
         public NewsOlderPostsViewHolder(View itemView) {
             super(itemView);
 
-            loadOlderPosts = (Button) itemView.findViewById(R.id.news_list_item_older_posts);
             olderPostsProgress = (ProgressBar) itemView.findViewById(R.id.news_list_item_older_posts_progress);
         }
     }
 
-    public NewsRecyclerAdapter(@Nullable View.OnClickListener onClickListener) {
+    public NewsRecyclerAdapter(@Nullable OlderPostsCallback olderPostsCallback, Activity activity) {
         super();
-        this.onClickListener = onClickListener;
-    }
-
-    public void cancelLoadingOlderPosts() {
-        isLoading = false;
-        int itemCount = getItemCount();
-        if (NewsManager.getInstance().olderPostsAvailable() && itemCount > 0)
-            notifyItemChanged(itemCount - 1);
+        this.olderPostsCallback = olderPostsCallback;
+        this.activity = activity;
     }
 
     public void setNews(News news) {
@@ -93,7 +157,7 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemViewType(int position) {
-        if (position == news.size() && NewsManager.getInstance().olderPostsAvailable())
+        if (position == news.size() && NewsManager.getInstance(activity).olderPostsAvailable())
             return VIEW_TYPE_OLDER_POSTS;
         else if (news.get(position).hasBaseImage())
             return VIEW_TYPE_ARTICLE_IMAGE;
@@ -119,29 +183,8 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof NewsOlderPostsViewHolder) {
-            final NewsOlderPostsViewHolder viewHolder = (NewsOlderPostsViewHolder) holder;
-
-            if (isLoading) {
-                viewHolder.loadOlderPosts.setVisibility(View.INVISIBLE);
-                viewHolder.olderPostsProgress.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.loadOlderPosts.setVisibility(View.VISIBLE);
-                viewHolder.olderPostsProgress.setVisibility(View.INVISIBLE);
-            }
-
-            viewHolder.loadOlderPosts.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    isLoading = !isLoading;
-                    int itemCount = getItemCount();
-                    if (itemCount > 0)
-                        notifyItemChanged(itemCount - 1);
-
-                    if (onClickListener != null)
-                        onClickListener.onClick(view);
-                }
-            });
-            viewHolder.loadOlderPosts.setTag(R.string.recycler_item_position, position);
+            if (olderPostsCallback != null)
+                olderPostsCallback.loadOlderPosts();
         } else {
             if (position < news.size()) {
                 final News.NewsData newsArticle = news.get(position);
@@ -151,6 +194,9 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                     viewHolder.title.setText(newsArticle.getTitle());
                     viewHolder.content.setText(newsArticle.getPreviewContent());
+
+                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) viewHolder.image.getLayoutParams();
+                    viewHolder.content.setImageSize(params.width + params.leftMargin + params.rightMargin, params.height + params.topMargin + params.bottomMargin);
 
                     viewHolder.image.setImageBitmap(null);
 
@@ -176,21 +222,11 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     if (newsArticle.getBaseImage() != null)
                         Picasso.with(viewHolder.itemView.getContext()).
                                 load(newsArticle.getBaseImage().getThumbnailUrl()).into(target);
-
-                    if (onClickListener != null) {
-                        viewHolder.itemView.setOnClickListener(onClickListener);
-                        viewHolder.itemView.setTag(R.string.recycler_item_position, position);
-                    }
                 } else if (holder instanceof NewsArticleViewHolder) {
                     NewsArticleViewHolder viewHolder = (NewsArticleViewHolder) holder;
 
                     viewHolder.title.setText(newsArticle.getTitle());
                     viewHolder.content.setText(newsArticle.getPreviewContent());
-
-                    if (onClickListener != null) {
-                        viewHolder.itemView.setOnClickListener(onClickListener);
-                        viewHolder.itemView.setTag(R.string.recycler_item_position, position);
-                    }
                 }
             }
         }
@@ -199,6 +235,14 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemCount() {
         return news == null ? 0 :
-                (NewsManager.getInstance().olderPostsAvailable() ? news.size() + 1 : news.size());
+                (NewsManager.getInstance(activity).olderPostsAvailable() ? news.size() + 1 : news.size());
+    }
+
+    public void freeMemory() {
+        this.activity = null;
+    }
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 }

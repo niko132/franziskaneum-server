@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -23,10 +22,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import de.franziskaneum.FranzCallback;
-import de.franziskaneum.Status;
+import de.franziskaneum.MainActivity;
 import de.franziskaneum.R;
+import de.franziskaneum.Status;
 import de.franziskaneum.drawer.DrawerFragment;
 import de.franziskaneum.settings.SettingsManager;
+import de.franziskaneum.timetable.Timetable;
+import de.franziskaneum.timetable.TimetableManager;
 import de.franziskaneum.views.SwipeRefreshLayout;
 
 /**
@@ -43,7 +45,6 @@ public class VPlanFragment extends DrawerFragment implements
     private VPlanRecyclerAdapter recyclerAdapter;
 
     private SwipeRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton floatingActionButton;
     private RelativeLayout errorContainer;
     private ImageView errorImage;
     private TextView errorDescription;
@@ -67,8 +68,9 @@ public class VPlanFragment extends DrawerFragment implements
                 if (mode == VPlanManager.Mode.CACHE && tmpVPlan == null) {
                     setRefreshing(true);
                     vplanManager.getVPlanAsync(VPlanManager.Mode.IF_MODIFIED, vplanCallback);
-                } else
+                } else {
                     setRefreshing(false);
+                }
             } else {
                 switch (status) {
                     case Status.AUTHENTICATION_NEEDED:
@@ -112,7 +114,7 @@ public class VPlanFragment extends DrawerFragment implements
     private BroadcastReceiver newVPlanAvailableBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(VPlanNotificationManager.ACTION_NEW_VPLAN_AVAILABLE)) {
+            if (intent.getAction() != null && intent.getAction().equals(VPlanNotificationManager.ACTION_NEW_VPLAN_AVAILABLE)) {
                 VPlan vplan = intent.getParcelableExtra(VPlan.EXTRA_VPLAN);
                 VPlanFragment.this.vplan = vplan;
                 if (recyclerAdapter != null)
@@ -135,6 +137,31 @@ public class VPlanFragment extends DrawerFragment implements
                 new IntentFilter(VPlanNotificationManager.ACTION_NEW_VPLAN_AVAILABLE);
         getActivity().registerReceiver(newVPlanAvailableBroadcastReceiver,
                 newVPlanAvailableIntentFilter);
+
+        SettingsManager settings = SettingsManager.getInstance();
+        if (settings.getSchoolClassStep() >= 11 && settings.isVPlanNotificationEnabled()) {
+            TimetableManager.getInstance().getTimetableAsync(new FranzCallback() {
+                @Override
+                public void onCallback(int status, Object... objects) {
+                    if (status == Status.OK && objects.length > 0 && objects[0] != null) {
+                        Timetable timetable = (Timetable) objects[0];
+
+                        if (timetable.numberOfLessons(false) < 2) {
+                            Snackbar.make(swipeRefreshLayout, "Ergänze deinen Stundenplan um Benachrichtigungen zu erhalten", Snackbar.LENGTH_INDEFINITE)
+                                    .setAction("Los geht's", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent timetableIntent = new Intent(getContext(), MainActivity.class);
+                                    timetableIntent.putExtra(MainActivity.EXTRA_DRAWER_ITEM_ID, R.id.drawer_timetable);
+
+                                    startActivity(timetableIntent);
+                                }
+                            }).show();
+                        }
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -177,9 +204,10 @@ public class VPlanFragment extends DrawerFragment implements
                     vplanManager.authenticateAsync(password, new FranzCallback() {
                         @Override
                         public void onCallback(int status, @Nullable Object... objects) {
-                            if (Status.OK == status)
+                            if (Status.OK == status) {
                                 vplanManager.getVPlanAsync(VPlanManager.Mode.IF_MODIFIED, vplanCallback);
-                            else
+                                VPlanNotificationManager.getInstance().makeNotificationAsync(VPlanNotificationManager.Mode.DOWNLOAD);
+                            } else
                                 authenticationNeeded(true);
                         }
                     });
@@ -211,11 +239,13 @@ public class VPlanFragment extends DrawerFragment implements
             VPlanNotificationManager.getInstance().getNotificationFromVPlanAsync(vplan, new FranzCallback() {
                 @Override
                 public void onCallback(int status, Object... objects) {
-                    if (Status.OK == status && objects.length > 0 && objects[0] != null) {
+                    if (objects.length > 0)
                         VPlanFragment.this.vplanNotification = (VPlanNotification) objects[0];
-                        if (recyclerAdapter != null)
-                            recyclerAdapter.setNotificationData(vplanNotification);
-                    }
+                    else
+                        VPlanFragment.this.vplanNotification = null;
+
+                    if (recyclerAdapter != null)
+                        recyclerAdapter.setNotificationData(vplanNotification);
                 }
             });
         }
@@ -226,25 +256,6 @@ public class VPlanFragment extends DrawerFragment implements
 
         if (swipeRefreshLayout != null)
             swipeRefreshLayout.setRefreshing(refreshing);
-
-        if (floatingActionButton != null)
-            if (refreshing) {
-                floatingActionButton.show(new FloatingActionButton.OnVisibilityChangedListener() {
-                    @Override
-                    public void onShown(FloatingActionButton fab) {
-                        super.onShown(fab);
-                        fab.setVisibility(View.VISIBLE);
-                    }
-                });
-            } else {
-                floatingActionButton.hide(new FloatingActionButton.OnVisibilityChangedListener() {
-                    @Override
-                    public void onHidden(FloatingActionButton fab) {
-                        super.onHidden(fab);
-                        fab.setVisibility(View.INVISIBLE);
-                    }
-                });
-            }
     }
 
     @Nullable
@@ -259,9 +270,6 @@ public class VPlanFragment extends DrawerFragment implements
         swipeRefreshLayout.setColorSchemeResources(R.color.ColorAccent);
         swipeRefreshLayout.setOnRefreshListener(this);
 
-        floatingActionButton = (FloatingActionButton) root.findViewById(R.id.fab);
-        floatingActionButton.setOnClickListener(this);
-
         setRefreshing(shouldRefresh);
 
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler);
@@ -269,7 +277,7 @@ public class VPlanFragment extends DrawerFragment implements
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         if (recyclerAdapter == null)
-            recyclerAdapter = new VPlanRecyclerAdapter(this);
+            recyclerAdapter = new VPlanRecyclerAdapter();
 
         if (vplan != null && !recyclerAdapter.hasData())
             recyclerAdapter.setVPlanData(vplan);
@@ -303,37 +311,12 @@ public class VPlanFragment extends DrawerFragment implements
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.fab:
-                setRefreshing(false);
-                if (vplan == null) {
-                    if (errorDescription != null)
-                        errorDescription.setText(R.string.no_connection);
-                    if (errorImage != null)
-                        errorImage.setImageDrawable(ContextCompat.getDrawable(
-                                getContext(), R.drawable.ic_no_connection));
-
-                    if (errorContainer != null)
-                        errorContainer.setVisibility(View.VISIBLE);
-                }
-                break;
             case R.id.error_container:
                 if (swipeRefreshLayout != null)
                     swipeRefreshLayout.setRefreshing(true);
                 if (errorContainer != null)
                     errorContainer.setVisibility(View.GONE);
                 onRefresh();
-                break;
-            default:
-                Object itemPositionTag = view.getTag(R.string.recycler_item_position);
-
-                if (itemPositionTag != null) {
-                    int itemPosition = (int) itemPositionTag;
-                    VPlan.VPlanDayData vplanDay = vplan.get(itemPosition);
-
-                    Intent vplanDayIntent = new Intent(getActivity(), VPlanDayActivity.class);
-                    vplanDayIntent.putExtra(VPlanDayActivity.EXTRA_VPLAN_DAY_DATA, vplanDay);
-                    startActivity(vplanDayIntent);
-                }
                 break;
         }
     }

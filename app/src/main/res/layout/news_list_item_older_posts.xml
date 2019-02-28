@@ -3,20 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="56dp" >
 
-    <Button
-        android:id="@+id/news_list_item_older_posts"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?selectableItemBackground"
-        android:text="@string/older_posts"
-        android:textColor="@color/ColorAccent" />
-
     <ProgressBar
         android:id="@+id/news_list_item_older_posts_progress"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:indeterminateOnly="true"
-        android:visibility="invisible" />
+        android:indeterminateOnly="true" />
 
 </FrameLayout>

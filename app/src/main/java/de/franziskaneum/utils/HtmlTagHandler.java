@@ -1,11 +1,11 @@
-package de.franziskaneum;
-
-import java.util.Vector;
-
-import org.xml.sax.XMLReader;
+package de.franziskaneum.utils;
 
 import android.text.Editable;
 import android.text.Html;
+
+import org.xml.sax.XMLReader;
+
+import java.util.Vector;
 
 public class HtmlTagHandler implements Html.TagHandler {
     private Vector<String> mListParents = new Vector<>();

@@ -1,52 +1,45 @@
 package de.franziskaneum.settings;
 
-import de.franziskaneum.R;
-
-import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.audiofx.BassBoost;
 import android.util.AttributeSet;
 
 import net.xpece.android.support.preference.DialogPreference;
 
+import de.franziskaneum.R;
+
 public class SchoolClassOrTeacherShortcutPreference extends DialogPreference {
 
-    private SettingsManager settings = SettingsManager.getInstance();
+    private SettingsManager settings;
 
     private int schoolClassStep, schoolClass;
     private String teacherShortcut;
     private boolean isTeacher;
 
-    @TargetApi(21)
     public SchoolClassOrTeacherShortcutPreference(Context context) {
         super(context);
-        init();
+        init(context);
     }
 
     public SchoolClassOrTeacherShortcutPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
     }
 
     public SchoolClassOrTeacherShortcutPreference(Context context, AttributeSet attrs,
                                                   int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context);
     }
 
-    @TargetApi(21)
     public SchoolClassOrTeacherShortcutPreference(Context context, AttributeSet attrs,
                                                   int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context);
 
     }
 
-    private void init() {
-        SettingsManager settings = SettingsManager.getInstance();
+    private void init(Context context) {
+        settings = SettingsManager.getInstance();
 
         isTeacher = settings.isTeacher();
         schoolClassStep = settings.getSchoolClassStep();

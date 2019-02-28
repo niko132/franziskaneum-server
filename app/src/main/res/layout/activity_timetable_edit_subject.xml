@@ -15,7 +15,6 @@
             android:background="@color/ColorPrimary"
             android:gravity="bottom"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_scrollFlags="scroll|enterAlways|snap"
             app:popupTheme="@style/ThemeOverlay.AppCompat"
             app:titleMarginBottom="16dp" />
     </android.support.design.widget.AppBarLayout>
@@ -45,8 +44,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/subject"
+                    android:inputType="text"
                     android:maxLength="200"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
 
             <TextView
@@ -74,7 +74,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/room"
-                    android:singleLine="true" />
+                    android:inputType="textCapWords"
+                    android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
 
             <View style="@style/Divider" />
@@ -86,12 +87,14 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp">
 
-                <android.support.design.widget.TextInputEditText
+                <android.support.v7.widget.AppCompatAutoCompleteTextView
                     android:id="@+id/timetable_edit_subject_teacher_or_school_class"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:completionThreshold="1"
                     android:hint="@string/teacher"
-                    android:singleLine="true" />
+                    android:inputType="textCapWords"
+                    android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
 
             <View style="@style/Divider" />

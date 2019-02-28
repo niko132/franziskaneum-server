@@ -24,6 +24,10 @@ public class TeacherList extends ArrayList<TeacherList.TeacherData> {
         super();
     }
 
+    public TeacherList(TeacherList teacherList) {
+        super(teacherList);
+    }
+
     @Nullable
     static TeacherList readFromFile(File file) {
         FileInputStream fis = null;
@@ -92,7 +96,7 @@ public class TeacherList extends ArrayList<TeacherList.TeacherData> {
         private String[] subjects;
         private String[] specificTasks;
 
-        TeacherData() {
+        public TeacherData() {
             super();
         }
 
@@ -114,7 +118,7 @@ public class TeacherList extends ArrayList<TeacherList.TeacherData> {
         }
 
         @Nullable
-        String getForename() {
+        public String getForename() {
             return forename;
         }
 
@@ -132,7 +136,7 @@ public class TeacherList extends ArrayList<TeacherList.TeacherData> {
         }
 
         @Nullable
-        String[] getSubjects() {
+        public String[] getSubjects() {
             return subjects;
         }
 
@@ -141,7 +145,7 @@ public class TeacherList extends ArrayList<TeacherList.TeacherData> {
         }
 
         @Nullable
-        String[] getSpecificTasks() {
+        public String[] getSpecificTasks() {
             return specificTasks;
         }
 

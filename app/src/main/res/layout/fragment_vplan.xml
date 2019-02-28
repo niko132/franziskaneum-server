@@ -13,8 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/ColorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_scrollFlags="scroll|enterAlways|snap" />
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
     </android.support.design.widget.AppBarLayout>
 
     <de.franziskaneum.views.SwipeRefreshLayout
@@ -26,7 +25,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:clipToPadding="false"
             android:paddingBottom="0dp"
             android:paddingEnd="16dp"
@@ -58,18 +57,5 @@
             android:textColor="@android:color/black"
             android:textSize="22sp" />
     </RelativeLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/floating_action_button_margin"
-        android:src="@drawable/ic_cancel"
-        android:visibility="invisible"
-        app:backgroundTint="@color/ColorAccent"
-        app:elevation="10dp"
-        app:fabSize="normal"
-        app:layout_anchor="@id/swipe_refresh"
-        app:layout_anchorGravity="bottom|right|end" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -1,5 +1,7 @@
 package de.franziskaneum.vplan;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import de.franziskaneum.R;
+import de.franziskaneum.utils.ClickableViewHolder;
 
 /**
  * Created by Niko on 21.12.2015.
@@ -19,13 +22,45 @@ public class VPlanRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_NORMAL = 1;
 
+    public class VPlanViewHolder extends ClickableViewHolder {
+
+        TextView title;
+        TextView subtitle;
+
+        public VPlanViewHolder(View itemView) {
+            super(itemView);
+            title = (TextView) itemView.findViewById(R.id.vplan_list_item_title);
+            subtitle = (TextView) itemView.findViewById(R.id.vplan_list_item_subtitle);
+        }
+
+        @Override
+        public void onClick(int position, @Nullable Context context) {
+            if (context != null && position - 1 >= 0 && vplanData.size() >= position) {
+                VPlan.VPlanDayData vplanDay = vplanData.get(position - 1);
+
+                Intent vplanDayIntent = new Intent(context, VPlanDayActivity.class);
+                vplanDayIntent.putExtra(VPlanDayActivity.EXTRA_VPLAN_DAY_DATA, vplanDay);
+                context.startActivity(vplanDayIntent);
+            }
+        }
+    }
+
+    public class VPlanHeaderViewHolder extends RecyclerView.ViewHolder {
+
+        TextView text;
+
+        public VPlanHeaderViewHolder(View itemView) {
+            super(itemView);
+            text = (TextView) itemView.findViewById(R.id.vplan_list_item_header_text);
+        }
+    }
+
     private VPlan vplanData;
     @Nullable
     private VPlanNotification vplanNotification;
-    private View.OnClickListener onClickListener;
 
-    public VPlanRecyclerAdapter(@Nullable View.OnClickListener onClickListener) {
-        this.onClickListener = onClickListener;
+    public VPlanRecyclerAdapter() {
+        super();
     }
 
     public void setVPlanData(VPlan vplanData) {
@@ -82,11 +117,6 @@ public class VPlanRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 viewHolder.subtitle.setText(vplanDay.getModified());
                 viewHolder.subtitle.setTextColor(ContextCompat.getColor(viewHolder.itemView.getContext(), R.color.DarkGray));
             }
-
-            if (onClickListener != null) {
-                viewHolder.itemView.setOnClickListener(onClickListener);
-                viewHolder.itemView.setTag(R.string.recycler_item_position, position - 1); // - 1 because of the header
-            }
         }
     }
 
@@ -101,28 +131,6 @@ public class VPlanRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             return VIEW_TYPE_HEADER;
 
         return VIEW_TYPE_NORMAL;
-    }
-
-    public static class VPlanViewHolder extends RecyclerView.ViewHolder {
-
-        TextView title;
-        TextView subtitle;
-
-        public VPlanViewHolder(View itemView) {
-            super(itemView);
-            title = (TextView) itemView.findViewById(R.id.vplan_list_item_title);
-            subtitle = (TextView) itemView.findViewById(R.id.vplan_list_item_subtitle);
-        }
-    }
-
-    public static class VPlanHeaderViewHolder extends RecyclerView.ViewHolder {
-
-        TextView text;
-
-        public VPlanHeaderViewHolder(View itemView) {
-            super(itemView);
-            text = (TextView) itemView.findViewById(R.id.vplan_list_item_header_text);
-        }
     }
 
 }

@@ -13,7 +13,7 @@
         android:textColor="@android:color/black"
         android:textStyle="bold" />
 
-    <TextView
+    <de.franziskaneum.views.TeacherLinkTextView
         android:id="@+id/vplan_day_list_item_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

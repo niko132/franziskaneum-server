@@ -8,7 +8,8 @@
     android:paddingEnd="16dp"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:paddingStart="16dp">
+    android:paddingStart="16dp"
+    android:focusable="true">
 
     <ImageView
         android:id="@+id/teacher_item_image"
@@ -48,8 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="marquee"
-                android:singleLine="true"
-                android:textColor="@color/DarkGray" />
+                android:textColor="@color/DarkGray"
+                android:singleLine="true" />
         </LinearLayout>
 
         <View

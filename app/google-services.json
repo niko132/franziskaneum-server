@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "334472337524",
+    "firebase_url": "https://franziskaneum-e27bf.firebaseio.com",
+    "project_id": "franziskaneum-e27bf",
+    "storage_bucket": "franziskaneum-e27bf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334472337524:android:040459ea5cafc7d7",
+        "android_client_info": {
+          "package_name": "de.franziskaneum"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334472337524-rqtaj9cim4ki19e90sfa4a1sr43csjsm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDN79NtZBh31h_QdxONsw-_DcewN1Lqi-4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

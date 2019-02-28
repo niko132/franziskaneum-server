@@ -1,12 +1,10 @@
 package de.franziskaneum.news;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.Html;
 
 import org.jsoup.Jsoup;
@@ -21,18 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.franziskaneum.FranzCallback;
-import de.franziskaneum.HtmlTagHandler;
-import de.franziskaneum.Network;
 import de.franziskaneum.ReturnValue;
 import de.franziskaneum.Status;
-import de.franziskaneum.Utils;
+import de.franziskaneum.utils.HtmlTagHandler;
+import de.franziskaneum.utils.Network;
+import de.franziskaneum.utils.Utils;
 
 /**
  * Created by Niko on 13.08.2016.
  */
 public class NewsManager {
     public static final String NEWS_BASE_URL =
-            "http://www.franziskaneum.de/wordpress/category/aktuelles/";
+            "https://www.franziskaneum.de/wordpress/category/aktuelles/";
     public static String NEWS_OLDER_POSTS_URL = NEWS_BASE_URL;
 
     private static NewsManager instance;
@@ -45,12 +43,15 @@ public class NewsManager {
     }
 
     public static void initInstance(Context context) {
-        instance = new NewsManager(context);
+        instance = new NewsManager(context.getApplicationContext());
     }
 
-    public static NewsManager getInstance() {
-        if (instance == null)
-            throw new NullPointerException("You have to init the instance");
+    public static NewsManager getInstance(Context context) {
+        if (instance == null) {
+//            throw new NullPointerException("You have to init the instance");
+
+            initInstance(context);
+        }
 
         return instance;
     }
@@ -147,7 +148,7 @@ public class NewsManager {
     }
 
     private ReturnValue downloadArticle(@NonNull String newsArticleURL) {
-        ReturnValue rv = null;
+        ReturnValue rv;
 
         if (Network.isConnected(context)) {
             HttpURLConnection newsArticleURLConnection = null;
